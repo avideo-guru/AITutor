@@ -30,6 +30,9 @@ updated: 2026-06-28
 ## 💻 Build / codebase
 - [[Codebase-AITutor]] — the Angular 18 frontend prototype ([repo](https://github.com/avideo-guru/AITutor)). Currently a UI shell with a *fake* tutor service; the note maps where the real backend plugs in.
 
+## 💡 Idea pipeline
+- [[Startup-Idea-Radar]] — 🆕 rolling 3-pass scouting doc: idea-identification canon (Altman CS183B, PG/YC, 2026 RFS) + scored idea batches. Keeps us idea-rich and pressure-tests idea #1.
+
 ## 📈 Strategy & market
 - [[Viability-Brutal-Honesty]] — 🆕 **read before pitching anyone**: the five brutal truths (melting accuracy wedge, engagement > accuracy, pricing vs free, untested GTM, autoformalization risk), competitor+human-tutor gap map, economics, and pre-registered kill criteria.
 - [[Competitive-Landscape]] — the 4 failures every existing tutor has (and which one we each answer).
