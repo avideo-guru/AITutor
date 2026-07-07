@@ -188,8 +188,82 @@ The headline: *"AI has stopped being a feature and started being the foundation.
 
 ---
 
-## §Pass 2 → Pass 3 handoff (do not delete — loop state)
-- **Pass 3 (last):** complex/deep research-flavored problems (verification-as-infrastructure, Indic data engines, AI personalized-medicine-lite, agri-intelligence for smallholders) — 4–6 cards; then the **consolidated ranking table of ALL ideas (A1–A10, B1–B10, C-batch)** on the six axes; final brutal top-3 shortlist with a concrete next-action each (obeying "sell before build"); close the loop after pushing.
+## §Pass 3 — Batch C: Deep / research-flavored problems (5 ideas)
+
+> These are the "hard but ours" ideas — where the math team's edge is structural, timelines are longer, and honesty matters most.
+
+### C1. Verification-as-Infrastructure (the neurosymbolic correctness layer) 🔴 complex
+- **Why it exists / validated by:** the market just told us this thesis is real — Amazon's Automated Reasoning checks tout **99% soundness** as a product feature; AUI raised at a **$750M cap** for neurosymbolic reasoning; Kognitos sells "hallucination-free automation"; finance/healthcare/insurance are adopting symbolic-constrained AI because pure LLMs can't be trusted with money or safety.
+- **Build:** our tutor's verifier generalized — a correctness gate for enterprise agent outputs in *quantitative* domains (calculations, unit-consistency, constraint satisfaction, reconciliation). "Your agent proposes; our engine disposes." Sold as an API to agent builders.
+- **Scores:** Crowded 2–3 · Feasible 3 (each domain needs its own formalization — the autoformalization wall again) · Scalable 4–5 · Viable ₹ 3–4 (early buyers: fintech/agent platforms) · Why-now 5 · Moat **5**.
+- **Brutal verdict:** this is [[Durable-Moat]]'s second act made explicit — and the honest sequencing is: **prove it in the tutor first**, where we control the domain, then generalize with revenue evidence. Starting here directly = a research lab cosplaying as a startup. The pivot door stays open (§2 of [[Architecture-Options]] keeps the verifier behind its own API for exactly this reason).
+
+### C2. Indic Domain-Data & Eval Engine (Scale AI for Bharat) 🔴 complex
+- **Why it exists:** IndiaAI Mission is real money (BharatGen ₹900Cr, 38k GPUs empanelled, AIKosh/Bhashini datasets) and sovereign models (Sarvam, Param2, Gnani) now beat frontier models on Indic benchmarks — but **high-quality domain-specific Indic data and rigorous evals remain the scarcest input** (benchmarks like ParamBench exist precisely because the gap is embarrassing). Labs and the government buy data and evaluation; someone must be the quality layer.
+- **Scores:** Crowded 3 · Feasible 3–4 (ops + annotator networks) · Scalable 3 (services-gravity is strong) · Viable ₹ 3–4 (B2G pays big but slow) · Why-now 5 · Moat 3–4 (datasets compound).
+- **Brutal verdict:** riding a government mission means government sales cycles and tender politics — miserable for students. The *eval* half (next card) is the defensible sliver; the data half slides into BPO economics. Partial NO.
+
+### C3. Independent AI Benchmark & Certification Lab for India 🟡 medium
+- **Why it exists:** sovereign-model claims ("outperforms frontier models on Indic tasks") are currently self-reported; procurement (govt, banks, edtech buying AI) has no neutral referee. US analog validated (LMArena/Artificial Analysis/HELM attract funding and influence). Certification + leaderboards + procurement-grade evals for Indic/domain AI = trust infrastructure.
+- **Scores:** Crowded 2 (India: nobody neutral) · Feasible 4 (pure eval methodology — our home turf) · Scalable 3–4 · Viable ₹ 3 (who pays is the puzzle: vendors paying compromises neutrality; buyers paying is slow) · Why-now 4–5 · Moat 3–4 (reputation is the moat, slow to build, hard to steal).
+- **Brutal verdict:** high-status, math-shaped, cheap to start (publish one rigorous benchmark → instant visibility with labs/press) — and a *terrible* pure business until procurement mandates certification. Best played as a **credibility wedge** (the way our public tutor accuracy report works) that can become a company later. Do the benchmark, defer the company.
+
+### C4. AI Diagnostics-lite for Tier-2/3 Healthcare 🔴 complex — conscious NO (for now)
+- **Why it exists:** 1:900 doctor-patient ratio; diagnostics deserts outside metros; AI triage genuinely helps.
+- **Brutal verdict:** medical device/CDSCO regulatory burden, liability for errors (fatal for a team whose brand is "never confidently wrong" — the one domain where a false positive kills), clinical-validation costs, and data collection years. Everything about it demands capital and clinicians we don't have. Respect it; don't touch it yet. Scores: Crowded 3 · Feasible **2** · Scalable 4 · Viable ₹ 3 · Why-now 4 · Moat 4.
+
+### C5. Agri-Intelligence for Smallholders 🔴 complex — conscious NO
+- **Why it exists:** hyperlocal advisory works (AgroStar/SatSure prove distribution), YC's own RFS #1 is agriculture AI, and impact is enormous.
+- **Brutal verdict:** the payer problem is unsolved a decade in — farmers can't pay, so revenue means govt/NGO/input-sellers, each of which distorts the product. US RFS version assumes robotics capital. Impact-rich, economics-poor, wrong team. Scores: Crowded 3 · Feasible 3 · Scalable 3 · Viable ₹ **2** · Why-now 4 · Moat 3.
+
+---
+
+## §FINAL — Consolidated brutal ranking (all 25 ideas)
+
+Scoring: six axes, 1–5; **Open = 6 − Crowded** so higher is always better; Total /30. These numbers are directional, not science — they exist to force arguments, not end them.
+
+| Rank | Idea | Open | Feas | Scale | ₹ | Now | Moat | **Total** | One-line brutal verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | **A6 Tally-native Company Brain** | 4 | 3 | 4.5 | 4 | 5 | 5 | **25.5** | Biggest ceiling; 18 months of connector schlep before magic |
+| 2 | **B2 Indian-rails MCP servers** | 4.5 | 4 | 4.5 | 3 | 5 | 3.5 | **24.5** | Cheapest own-a-layer bet; monetizes late; platform risk |
+| 2 | **B7 DPDP autopilot (Vanta-for-India)** | 3.5 | 4 | 4.5 | 4 | 5 | 3.5 | **24.5** | Best pure SaaS here; hostage to enforcement timeline |
+| 2 | **C1 Verification-as-infra** | 3.5 | 3 | 4.5 | 3.5 | 5 | 5 | **24.5** | Our true second act; premature as a first act |
+| 5 | **B1 Agent eval infra** | 2 | 4 | 5 | 4 | 5 | 4 | **24** | Best global math-fit; crowded — needs the verified-outcome wedge |
+| 5 | **A2 Insurance-claim fighter** | 4.5 | 5 | 4 | 4 | 4 | 2.5 | **24** | Fastest to first rupee; one-shot usage caps it |
+| 7 | **A10 Answer-sheet grading AI** | 4 | 4 | 4 | 4 | 4 | 3.5 | **23.5** | Most strategic for US — same buyer & moat as the tutor |
+| 7 | **B4 Verifiable RL environments** | 3 | 3.5 | 4 | 4 | 5 | 4 | **23.5** | Verifier DNA, lab money; thin hit-driven market |
+| 9 | **B6 Agentic-commerce enablement** | 4 | 5 | 3.5 | 3.5 | 5 | 2 | **23** | 24-month arbitrage window; business, not startup |
+| 10 | A3 AI-native CA firm | 3 | 4 | 4 | 4 | 4 | 3.5 | 22.5 | Real & recurring; regulatory + trust schlep |
+| 10 | B10 Creator-owned AI tutors | 4 | 4 | 4 | 3.5 | 4 | 3 | 22.5 | Not a company — a GTM variant of idea #1 |
+| 10 | C3 AI benchmark/cert lab | 4 | 4 | 3.5 | 3 | 4.5 | 3.5 | 22.5 | Do the benchmark for credibility; defer the company |
+| 13 | A4 Clinic/lab front office | 3 | 4 | 3 | 4 | 4 | 4 | 22 | Proven pain; services-company trap |
+| 14 | A7 Property due-diligence AI | 4.5 | 2 | 3 | 4.5 | 3.5 | 4 | 21.5 | Huge iff records access works — needs a 2-week spike |
+| 14 | C2 Indic data engine | 3 | 3.5 | 3 | 3.5 | 5 | 3.5 | 21.5 | Eval half interesting; data half is BPO |
+| 16 | A1 NRI elder-care | 4 | 3 | 2.5 | 5 | 3 | 3 | 21 | Best *business*, worst *startup* on the list |
+| 17 | B8 Finance AI on AA rails | 3 | 3 | 5 | 2.5 | 4 | 3 | 20.5 | Beautiful TAM slide, dead revenue slide |
+| 18 | A5 Study-abroad counselor | 2.5 | 5 | 4 | 3.5 | 3 | 2 | 20 | Easy to build, hard to defend |
+| 18 | B5 AI-output audit/insurance | 4 | 3 | 4 | 2 | 3 | 4 | 20 | Right thesis, market not ready — park to 2027 |
+| 20 | C4 Tier-2/3 diagnostics | 3 | 2 | 4 | 3 | 4 | 4 | 20 | Regulatory/liability wall — conscious NO |
+| 21 | A8 Voice collections agent | 2 | 3 | 4 | 4 | 4 | 2.5 | 19.5 | Crowded; only with an eval wedge |
+| 21 | B9 AI companion (India) | 2 | 5 | 5 | 2 | 4 | 1.5 | 19.5 | Off-brand, off-mission — conscious NO |
+| 23 | B3 Agent memory service | 1 | 3 | 5 | 3 | 4 | 2 | 18 | Funded incumbents; feature not company |
+| 23 | C5 Smallholder agri-AI | 3 | 3 | 3 | 2 | 4 | 3 | 18 | Payer unsolved for a decade — conscious NO |
+| 25 | A9 Trades marketplace | 2 | 1.5 | 3 | 3 | 3 | 2 | 14.5 | The reference NO — capital game, wrong team |
+
+### The brutal top-3 (excluding idea #1, which stays the committed bet) + sell-before-build next actions
+1. **A10 — Answer-sheet grading AI.** Same coaching-institute buyer, same verification moat, monetizes even if students never chat with AI. *Next action (this week, ₹0):* when P4 does the 3-institute design-partner calls for the tutor, ask one extra question — "would you pay ₹X/batch for overnight graded mocks with per-student error analytics?" Count the yeses. If grading outsells tutoring, that's signal, not betrayal.
+2. **B2 — Indian-rails MCP servers.** The own-a-layer lottery ticket at near-zero cost. *Next action (one weekend):* ship an OSS Tally MCP server to GitHub, post to r/developersIndia + X; 200 stars or 3 "can we use this?" DMs = keep pulling the thread.
+3. **B7 — DPDP autopilot.** The best standalone SaaS if we ever abandon edtech. *Next action (₹0):* 10 stranger interviews (startup founders/compliance owners): "what will you pay when enforcement letters start?" Per §0 street-advice rule 3 — only stranger wallets count.
+
+### Meta-verdict (the honest close)
+Pressure-tested against all 25, **the verified tutor survives as idea #1** — not because it out-scores A6/B2/B7 on raw numbers, but because of the two multipliers the table can't capture: **founder-market fit** (we are the users; organic-idea rule) and **compounding work already done** ([[PRD]], [[Architecture-Options]], the verifier plan). The radar's real output: A10 and B10 are *extensions* of idea #1 that widen its revenue surface; C1 is its second act; B1/B4/C3 are its pivot insurance. That's a coherent portfolio around one thesis — verification is the product — rather than 25 directions. Per Altman: idea is the smallest multiplier. Pick, execute, revisit this doc quarterly.
+
+## Sources (Pass 3)
+- [IndiaAI Mission — sovereign models launch](https://techobserver.in/news/egov/indiaai-mission-sovereign-ai-models-indian-languages-321425/) · [PIB — IndiaAI progress](https://www.pib.gov.in/PressReleasePage.aspx?PRID=2239614&reg=3&lang=1) · [NVIDIA — India AI infrastructure](https://blogs.nvidia.com/blog/india-ai-mission-infrastructure-models/) · [ParamBench (Indic eval gap)](https://arxiv.org/pdf/2508.16185)
+- [StartUs — top neurosymbolic AI companies 2026](https://www.startus-insights.com/innovators-guide/neurosymbolic-ai-companies/) · [Kognitos — hallucination-free automation](https://www.kognitos.com/blog/what-is-neurosymbolic-ai/) · [PYMNTS — neurosymbolic AI for the C-suite](https://www.pymnts.com/artificial-intelligence-2/2026/neurosymbolic-ai-aims-to-make-ai-safe-for-the-c-suite/)
+- [BCG — AI in Indian agriculture & healthcare](https://www.bcg.com/publications/2025/india-unlocking-ai-potential-in-india-transforming-agriculture-and-healthcare) · [IndiaAI — 100+ AI-impact startups compendium](https://indiaai.gov.in/article/india-s-ai-impact-startups-a-compendium-of-100-startups-and-nonprofits-delivering-population-scale-impact) · [SkyQuest — AI for smallholders](https://www.skyquestt.com/insight/resources/ai-transforming-smallholder-farmers-india)
+
+> **Loop closed (3/3 passes done, 2026-07-07).** Revisit quarterly or when a kill criterion in [[Viability-Brutal-Honesty]] fires.
 
 ## Sources (Pass 1)
 - [YC Requests for Startups (Summer 2026)](https://www.ycombinator.com/rfs) · [TheVCCorner — all 15 + 150 concrete ideas](https://www.thevccorner.com/p/yc-summer-2026-requests-for-startups-ideas) · [TNW on YC's hard-tech pivot](https://thenextweb.com/news/yc-summer-2026-rfs-hard-tech-pivot)
