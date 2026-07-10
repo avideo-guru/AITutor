@@ -7,6 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="An AI tutor that mathematically verifies every step it shows you. Verified solutions, honest uncertainty, and wrong-step diagnosis for JEE and NEET preparation.">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // Set theme class before first paint to avoid a flash of the wrong theme
+    (function () {
+      var stored = localStorage.getItem('theme');
+      var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

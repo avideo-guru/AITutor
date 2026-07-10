@@ -1,28 +1,87 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg-primary: #0b0f19;
-  --bg-secondary: #111827;
-  --bg-tertiary: #1f2937;
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
-  
-  --color-purple: #8b5cf6;
-  --color-purple-hover: #7c3aed;
-  --color-cyan: #06b6d4;
-  --color-cyan-hover: #0891b2;
-  --color-blue: #3b82f6;
-  
-  --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
-  --accent-gradient-hover: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%);
-  
-  --glass-bg: rgba(17, 24, 39, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  
-  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-family-display: 'Outfit', sans-serif;
+  color-scheme: light;
+
+  /* Plain cream paper, antfu.me-style opacity ramp for text */
+  --bg: #faf7f0;
+  --surface: #fffdf7;
+  --header-bg: rgba(250, 247, 240, 0.92);
+  --ink: #3b3830;
+  --ink-75: rgba(59, 56, 48, 0.78);
+  --ink-50: rgba(59, 56, 48, 0.55);
+  --ink-30: rgba(59, 56, 48, 0.34);
+  --border: rgba(59, 56, 48, 0.14);
+
+  /* One accent, used sparingly */
+  --accent: #b0592f;
+  --teal: #2f7e6d;
+  --green: #2f7e5d;
+  --amber: #9a6b15;
+  --purple: #8a4fa8;
+  --blue: #4a6b8a;
+
+  /* Dark warm terminal chrome (same in both themes) */
+  --terminal-bg: #2a2521;
+  --terminal-header-bg: rgba(255, 255, 255, 0.04);
+  --terminal-border: rgba(255, 255, 255, 0.08);
+  --terminal-text: #e8e0ce;
+  --terminal-dim: #a89f8c;
+  --terminal-shadow: 0 10px 30px rgba(59, 56, 48, 0.15);
+  --terminal-edge: rgba(42, 37, 33, 0.9);
+
+  --skeleton-1: #f2ede1;
+  --skeleton-2: #eae3d1;
+  --scrollbar-thumb: #ddd5c2;
+  --selection: rgba(176, 89, 47, 0.18);
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Legacy aliases still referenced by component styles */
+  --bg-primary: var(--bg);
+  --bg-secondary: #f4efe3;
+  --bg-tertiary: #ece5d3;
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-50);
+  --text-muted: var(--ink-30);
+  --glass-border: var(--border);
+  --font-family-sans: var(--font-sans);
+  --font-family-display: var(--font-sans);
+  --font-family-mono: var(--font-mono);
+}
+
+html.dark {
+  color-scheme: dark;
+
+  /* Warm near-black, antfu.me dark mode */
+  --bg: #121110;
+  --surface: #1a1816;
+  --header-bg: rgba(18, 17, 16, 0.9);
+  --ink: #dcd7cb;
+  --ink-75: rgba(220, 215, 203, 0.78);
+  --ink-50: rgba(220, 215, 203, 0.52);
+  --ink-30: rgba(220, 215, 203, 0.32);
+  --border: rgba(220, 215, 203, 0.13);
+
+  --accent: #d98e6a;
+  --teal: #5fb4a2;
+  --green: #6fbf94;
+  --amber: #cfa04d;
+  --purple: #b78ad4;
+  --blue: #85a3c0;
+
+  --terminal-bg: #1c1a17;
+  --terminal-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --terminal-edge: rgba(220, 215, 203, 0.1);
+
+  --skeleton-1: #1e1c19;
+  --skeleton-2: #26231f;
+  --scrollbar-thumb: #363330;
+  --selection: rgba(217, 142, 106, 0.25);
+
+  --bg-secondary: #181614;
+  --bg-tertiary: #242220;
 }
 
 * {
@@ -37,20 +96,21 @@ html {
 }
 
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-family-sans);
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100%;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-display);
-  font-weight: 700;
-  color: #ffffff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  color: var(--ink);
 }
 
 a {
@@ -58,20 +118,23 @@ a {
   text-decoration: none;
 }
 
-/* Custom Scrollbar for modern look */
+::selection {
+  background: var(--selection);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--ink-30);
 }

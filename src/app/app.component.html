@@ -1,15 +1,9 @@
 <header class="app-header">
   <div class="header-container">
     <div class="logo">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="8" fill="url(#logoGrad)" />
-        <path d="M9 16L13.5 20.5L23 11.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        <defs>
-          <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#8B5CF6" />
-            <stop offset="1" stop-color="#06B6D4" />
-          </linearGradient>
-        </defs>
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="8" fill="#3b3830" />
+        <path d="M9 16L13.5 20.5L23 11.5" stroke="#faf7f0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span class="logo-text">AI<span>Tutor</span></span>
     </div>
@@ -21,17 +15,22 @@
     </nav>
     
     <div class="header-actions">
+      <button class="theme-toggle" (click)="toggleTheme()" [attr.aria-label]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'">
+        @if (isDark()) {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        }
+      </button>
       <a href="#demo" class="btn-primary-sm">Start Learning</a>
     </div>
   </div>
 </header>
 
-<main class="main-content">
-  <!-- Glowing Background Blobs for Visual Interest -->
-  <div class="glow-blob blob-1"></div>
-  <div class="glow-blob blob-2"></div>
-  <div class="glow-blob blob-3"></div>
+<!-- Generative plum-branch background (grows from the viewport edges) -->
+<app-art-plum />
 
+<main class="main-content">
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-text-container">
@@ -98,16 +97,24 @@
     
     <div class="subject-tabs">
       <button class="subject-tab-btn" [class.active]="selectedSubject() === 'math'" (click)="selectSubject('math')">
-        <span class="tab-icon font-math">∑</span> Math
+        <span class="tab-icon font-math">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 5H7l6 7-6 7h11"/></svg>
+        </span> Math
       </button>
       <button class="subject-tab-btn" [class.active]="selectedSubject() === 'science'" (click)="selectSubject('science')">
-        <span class="tab-icon font-science">⚛</span> Science
+        <span class="tab-icon font-science">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="10" ry="4.2"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(120 12 12)"/></svg>
+        </span> Science
       </button>
       <button class="subject-tab-btn" [class.active]="selectedSubject() === 'history'" (click)="selectSubject('history')">
-        <span class="tab-icon font-history">📜</span> History
+        <span class="tab-icon font-history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </span> History
       </button>
       <button class="subject-tab-btn" [class.active]="selectedSubject() === 'coding'" (click)="selectSubject('coding')">
-        <span class="tab-icon font-coding">&lt;/&gt;</span> Coding
+        <span class="tab-icon font-coding">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </span> Coding
       </button>
     </div>
   </section>
@@ -118,16 +125,32 @@
       
       <!-- AI Tutor Chat Simulator -->
       <div class="widget-card chat-widget glass-panel">
+        <div class="terminal-bar">
+          <div class="dot-indicators">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-bar-title">tutor-chat — zsh</span>
+        </div>
         <div class="widget-header">
           <div class="tutor-profile">
             <div class="tutor-avatar-container">
               <div class="tutor-avatar-glow"></div>
               <span class="tutor-avatar-emoji">
                 @switch (selectedSubject()) {
-                  @case ('math') { 🧮 }
-                  @case ('science') { 🔬 }
-                  @case ('history') { 🏛️ }
-                  @case ('coding') { 💻 }
+                  @case ('math') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 5H7l6 7-6 7h11"/></svg>
+                  }
+                  @case ('science') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="10" ry="4.2"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.2" transform="rotate(120 12 12)"/></svg>
+                  }
+                  @case ('history') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  }
+                  @case ('coding') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  }
                 }
               </span>
             </div>
@@ -144,7 +167,7 @@
         </div>
 
         <!-- Chat History -->
-        <div class="chat-history">
+        <div class="chat-history" #chatHistoryEl>
           @for (msg of chatMessages(); track msg.timestamp) {
             <div class="chat-bubble-container" [class.user-msg]="msg.sender === 'user'" [class.tutor-msg]="msg.sender === 'tutor'">
               <div class="bubble">
@@ -177,7 +200,7 @@
         <div class="quick-prompts-wrapper">
           <span class="quick-prompt-label">Quick Prompts:</span>
           <div class="quick-prompts-list">
-            @for (prompt of quickPrompts(); track prompt) {
+            @for (prompt of quickPrompts(); track $index) {
               <button class="quick-prompt-btn" (click)="askQuickPrompt(prompt)">
                 {{ prompt }}
               </button>
@@ -208,6 +231,14 @@
 
       <!-- Study Checklist Dashboard -->
       <div class="widget-card checklist-widget glass-panel" id="planner">
+        <div class="terminal-bar">
+          <div class="dot-indicators">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-bar-title">study-planner.md</span>
+        </div>
         <div class="widget-header">
           <div>
             <h3>My Study Planner</h3>
@@ -272,8 +303,10 @@
             </div>
           } @empty {
             <div class="empty-state">
-              <span class="empty-icon">📁</span>
-              <p>No study topics listed for {{ selectedSubject() }}. Add one above to get started!</p>
+              <span class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              </span>
+              <p>No study topics listed for {{ selectedSubject() }}. Add one above to get started.</p>
             </div>
           }
         </div>
@@ -293,25 +326,33 @@
     @defer (on viewport) {
       <div class="features-grid">
         <div class="feature-card glass-panel">
-          <div class="feature-icon">✅</div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
           <h3>Verified Steps</h3>
           <p>Every solution step is checked by a symbolic + numeric math engine (CAS, unit analysis, equivalence testing). If a step can't be verified, we say so instead of guessing.</p>
         </div>
 
         <div class="feature-card glass-panel">
-          <div class="feature-icon">🔍</div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
           <h3>Wrong-Step Diagnosis</h3>
           <p>Paste your own attempt and we pinpoint the exact step where it went wrong — and whether the mistake was conceptual, computational, or careless.</p>
         </div>
 
         <div class="feature-card glass-panel">
-          <div class="feature-icon">⚡</div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
           <h3>Fast or Guided — Your Call</h3>
           <p>Need the answer now? Fast mode gives the full verified solution. Want to learn? Guided mode reveals one hint at a time, Socratic-style, without forcing it.</p>
         </div>
 
         <div class="feature-card glass-panel">
-          <div class="feature-icon">🗣️</div>
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 8.5-8.5h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </div>
           <h3>Made for India</h3>
           <p>JEE &amp; NEET aligned problem bank, Hinglish and regional-language explanations, voice support, and delivery over WhatsApp — no app install needed.</p>
         </div>
@@ -327,7 +368,7 @@
     } @placeholder {
       <!-- Placeholder content prior to scroll trigger -->
       <div class="defer-placeholder">
-        <p>✨ Scroll down to view our core technology stack and benefits...</p>
+        <p>Scroll down to view our core technology stack and benefits.</p>
       </div>
     }
   </section>

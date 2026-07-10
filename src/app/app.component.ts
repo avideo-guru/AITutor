@@ -1,7 +1,8 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, signal, computed, effect, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AiTutorService } from './services/ai-tutor.service';
+import { ArtPlumComponent } from './components/art-plum.component';
 import { Subscription } from 'rxjs';
 
 interface ChatMessage {
@@ -23,16 +24,33 @@ interface StudyTask {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ArtPlumComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   private tutorService = inject(AiTutorService);
   private chatSubscription?: Subscription;
 
+  @ViewChild('chatHistoryEl') private chatHistoryEl?: ElementRef<HTMLDivElement>;
+
+  constructor() {
+    // Keep the chat pinned to the latest message while replies stream in
+    effect(() => {
+      this.chatMessages();
+      this.tutorIsTyping();
+      setTimeout(() => {
+        const el = this.chatHistoryEl?.nativeElement;
+        if (el) el.scrollTop = el.scrollHeight;
+      });
+    });
+  }
+
   // App title
   title = 'AITutor - Your Intelligent Study Companion';
+
+  // Theme (class set before first paint by the index.html script)
+  isDark = signal<boolean>(document.documentElement.classList.contains('dark'));
 
   // Signals
   selectedSubject = signal<string>('math');
@@ -63,12 +81,13 @@ export class AppComponent implements OnInit {
     return this.studyTasks().filter(task => task.subject === this.selectedSubject());
   });
 
+  // Count within the selected subject so the progress bar matches the visible list
   completedTasksCount = computed(() => {
-    return this.studyTasks().filter(task => task.completed).length;
+    return this.filteredTasks().filter(task => task.completed).length;
   });
 
   totalTasksCount = computed(() => {
-    return this.studyTasks().length;
+    return this.filteredTasks().length;
   });
 
   completionProgressPercentage = computed(() => {
@@ -105,6 +124,17 @@ export class AppComponent implements OnInit {
   });
 
   ngOnInit() {}
+
+  ngOnDestroy() {
+    this.chatSubscription?.unsubscribe();
+  }
+
+  toggleTheme() {
+    const dark = !this.isDark();
+    this.isDark.set(dark);
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }
 
   selectSubject(subject: string) {
     this.selectedSubject.set(subject);
@@ -143,54 +173,67 @@ export class AppComponent implements OnInit {
 
     // Prepare container for tutor's streamed response
     let tutorMessageIndex = -1;
-    const willBeVerified = this.tutorService.isVerifiable(this.selectedSubject(), promptText);
 
-    // Call service to stream response
+    const ensureTutorMessage = () => {
+      if (tutorMessageIndex !== -1) return;
+      this.tutorIsTyping.set(false);
+      tutorMessageIndex = this.chatMessages().length;
+      this.chatMessages.update(msgs => [
+        ...msgs,
+        { sender: 'tutor', text: '', timestamp: new Date() }
+      ]);
+    };
+
+    const patchTutorMessage = (patch: Partial<ChatMessage>) => {
+      if (tutorMessageIndex === -1) return;
+      this.chatMessages.update(msgs => {
+        const updated = [...msgs];
+        updated[tutorMessageIndex] = { ...updated[tutorMessageIndex], ...patch };
+        return updated;
+      });
+    };
+
+    // Stream the answer from the backend; the verification verdict arrives
+    // as its own event once the full answer has streamed in
     this.chatSubscription = this.tutorService
       .streamResponse(this.selectedSubject(), promptText)
       .subscribe({
-        next: (wordChunk: string) => {
-          if (this.tutorIsTyping()) {
-            this.tutorIsTyping.set(false);
-            tutorMessageIndex = this.chatMessages().length;
-            this.chatMessages.update(msgs => [
-              ...msgs,
-              {
-                sender: 'tutor',
-                text: '',
-                timestamp: new Date()
-              }
-            ]);
-          }
-
-          if (tutorMessageIndex !== -1) {
-            this.chatMessages.update(msgs => {
-              const updated = [...msgs];
-              updated[tutorMessageIndex] = {
-                ...updated[tutorMessageIndex],
-                text: updated[tutorMessageIndex].text + wordChunk
-              };
-              return updated;
-            });
+        next: (event) => {
+          switch (event.type) {
+            case 'token':
+              ensureTutorMessage();
+              this.chatMessages.update(msgs => {
+                const updated = [...msgs];
+                updated[tutorMessageIndex] = {
+                  ...updated[tutorMessageIndex],
+                  text: updated[tutorMessageIndex].text + event.text
+                };
+                return updated;
+              });
+              break;
+            case 'verification':
+              patchTutorMessage({ verified: event.verified ?? false });
+              break;
+            case 'error':
+              ensureTutorMessage();
+              patchTutorMessage({
+                text: 'Something went wrong while reaching the tutor service. Please try again.',
+                verified: false
+              });
+              break;
           }
         },
         error: (err) => {
           console.error(err);
           this.tutorIsTyping.set(false);
+          ensureTutorMessage();
+          patchTutorMessage({
+            text: 'The tutor service is unreachable right now. Make sure the backend is running, then try again.',
+            verified: false
+          });
         },
         complete: () => {
           this.tutorIsTyping.set(false);
-          // Attach the verification badge once the full answer has streamed in
-          if (tutorMessageIndex !== -1) {
-            this.chatMessages.update(msgs => {
-              const updated = [...msgs];
-              updated[tutorMessageIndex] = {
-                ...updated[tutorMessageIndex],
-                verified: willBeVerified
-              };
-              return updated;
-            });
-          }
         }
       });
   }
