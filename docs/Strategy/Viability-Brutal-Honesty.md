@@ -1,6 +1,6 @@
 ---
 tags: [type/note, domain/startup, startup/strategy, decision/anchor, status/active]
-updated: 2026-07-06
+updated: 2026-07-11
 ---
 # 🔨 Brutal Honesty — Is This Startup Viable?
 
@@ -108,6 +108,26 @@ The user is right: verified reasoning (Lean/ATP step-checking, PRMs, RLVR), know
 
 **Scalability verdict:** software scales; **institute sales don't** (field-sales-shaped). Scalable paths beyond the beachhead, in order of realism: (1) white-label API for mid-size edtechs/publishers, (2) the RLVR-trained exam-math model licensed as an API (the B-2 idea folded in), (3) international exam markets (SAT/Gaokao-adjacent) with the same verifier core.
 
+### 3.1 Benchmark vs the wrapper unicorns (added 2026-07-11)
+
+What the 2026 unicorn data says about *our* margin structure — the verifier is not a feature, **it is the gross margin**:
+
+- **The industry backdrop:** AI application-layer gross margins average ~38–52% vs 75–90% for classic SaaS; inference eats ~23% of revenue at scaling AI companies; thin wrappers run at 25% or negative (Replit disclosed negative gross margins; early GitHub Copilot lost ~$80/user/mo on heavy users).
+- **The Cursor lesson (the strongest external validation of our thesis):** Anysphere at ~$4B annualized revenue was only *slightly* gross-margin-positive — profitable on enterprise seats, **losing money on individual subscriptions** — and got to breakeven specifically by building its own cheaper model (Composer) and routing to cheap models. The biggest wrapper success in history could not serve consumers profitably on frontier-model inference; its fix was our architecture (routing + owning a cheaper specialized model). Our verifier achieves the same margin repair without training a model first: it makes a ₹0.2-class model *safe to serve*.
+- **The Harvey lesson (for RLVR):** Harvey ($11B on ~$190M ARR) scrapped its proprietary legal model after frontier models beat it on Harvey's own benchmark, and survives on workflows + firm partnerships + data. Caution for anyone whose moat is "our fine-tune is smarter." Our RLVR plan survives this because it is a **cost** play (cheap model made trustworthy by a deterministic verifier), not a quality play against frontier.
+- **The Speak lesson (for B2C):** the one consumer-AI-edtech near-unicorn success ($100M+ ARR, near profitable) charges **$20/mo in Korea/Japan** — 8× our price point in far richer markets, plus a growing enterprise arm. There is no consumer-AI-edtech success at ₹299/mo anywhere. Confirms §1.3: B2C is a funnel, never the business.
+
+**The per-seat arithmetic (why the verifier = the margin):** at ₹60/seat/mo, a student asking ~60 questions/mo costs:
+- **Frontier serving** (Gemini-2.5-Pro-class, ~₹0.9/solve): ≈ ₹54/seat → 90–100%+ COGS → *dead on arrival* (Replit territory).
+- **Verified cheap-model serving** (DeepSeek-class ~₹0.08 raw; k-samples + verify ≈ ₹0.25–0.5; cached repeats ~₹0.02; blended <₹0.2): ≈ **₹12/seat → ~75–80% gross margin** — better than the AI-app average, approaching SaaS economics.
+
+The architecture and the business model are the same object: cheap-model routing made safe by verification is the entire difference between thin-wrapper margins and a viable company.
+
+**Three margin caveats the arithmetic must respect (found in code review, 2026-07-11):**
+1. **The unlimited-Pro trap:** `plan='pro'` currently bypasses all caps (`ask.py`). A heavy Pro user on flat ₹299/mo is exactly the Copilot $80/user failure mode. Ship a generous fair-use cap (e.g., 1,500 q/mo) before Pro has real users.
+2. **Photo questions cost ~10× text** (vision routes to Gemini ~₹1/solve vs ₹0.08 DeepSeek text) — and Indian students are photo-first (Photomath behavior). Mitigation: cheap OCR→text upfront, then the text pipeline; this also makes solutions machine-checkable, so it serves the verifier roadmap too.
+3. **Use net revenue:** ₹60/seat is ~₹47–50 after GST (18%) + payment/collection costs, and free-tier users burn inference at ₹0 revenue. The margin claim survives on net numbers, but Phase-1 unit economics must be computed net.
+
 ---
 
 ## 4. Gap-closing programme (each weak point → a concrete move)
@@ -151,6 +171,7 @@ Write these down now so we don't move goalposts later:
 - Parents & human tutors (accountability, 85% for younger kids): [StarSpark](https://www.starspark.ai/blog/ai-tutors-vs-human-tutors-best-for-your-child), [Becontree Tuition](https://becontreetuition.com/news-updates/ai-tutoring-vs-human-tutors-why-qualified-teachers-still-win-in-2025)
 - Verified-tutoring research (LeanTutor, Safe, PRMs, MR-RLVR): [LeanTutor](https://arxiv.org/html/2506.08321v2), [HERMES](https://arxiv.org/pdf/2511.18760), [Proof-RM](https://arxiv.org/pdf/2602.02377)
 - Squirrel AI (43M students, US 2026): [Forbes](https://www.forbes.com/sites/forbeschina/2025/02/18/derek-li-and-squirrel-ai-aim-to-lead-the-future-of-ai-driven-education/), [Wikipedia](https://en.wikipedia.org/wiki/Squirrel_AI)
+- §3.1 wrapper-unicorn benchmark (web research, 2026-07-11): Cursor margins/enterprise-vs-individual + Composer routing: [TechCrunch](https://techcrunch.com/2026/04/17/sources-cursor-in-talks-to-raise-2b-at-50b-valuation-as-enterprise-growth-surges/), [ValueAddVC](https://valueaddvc.com/blog/cursor-ai-valuation-how-a-code-editor-became-a-9b-company), [DigitalApplied (SpaceX acquisition)](https://www.digitalapplied.com/blog/spacex-acquires-cursor-anysphere-60b-ai-coding-2026) · Harvey scrapped proprietary model, workflow moat: [CNBC](https://www.cnbc.com/2026/03/25/legal-ai-startup-harvey-raises-200-million-at-11-billion-valuation.html), [Contrary Research](https://research.contrary.com/company/harvey), [Sacra](https://sacra.com/c/harvey/) · AI-app margin data (38–52% avg, inference ~23% of revenue, Replit negative, Copilot -$80/user): [Upstarts](https://www.upstartsmedia.com/p/data-ai-startup-margins-rise), [SoftwareSeni](https://www.softwareseni.com/why-ai-gross-margins-are-so-much-lower-than-saas-and-what-that-means-for-your-business/), [Monetizely](https://www.getmonetizely.com/blogs/the-economics-of-ai-first-b2b-saas-in-2026) · Speak ($100M ARR at $20/mo, Korea/Japan): [Speak blog](https://www.speak.com/blog/series-c), [Yahoo Finance](https://finance.yahoo.com/news/1-billion-ai-startup-backed-144613265.html) · Perplexity ~$450M ARR: [Perplexity AI Magazine](https://perplexityaimagazine.com/perplexity-hub/perplexity-ai-revenue-2026/)
 
 ## Connections
 - Reframes → [[Verification-Engine]] (verifier = cost weapon + proof + diagnosis, not just accuracy)
