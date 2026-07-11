@@ -7,6 +7,10 @@ from app.config import settings
 from app.db import get_pool
 from app.errors import ApiError
 
+# Cached client fetches Supabase's public signing keys from its JWKS endpoint,
+# so this verifies tokens under key rotation without a shared secret.
+_jwks_client = jwt.PyJWKClient(f"{settings.supabase_url}/auth/v1/.well-known/jwks.json")
+
 
 @dataclass
 class AuthUser:
@@ -15,15 +19,17 @@ class AuthUser:
 
 
 async def get_current_user(request: Request) -> AuthUser:
-    """Verify the Supabase access token (HS256, shared JWT secret)."""
+    """Verify the Supabase access token against Supabase's published JWKS."""
     auth = request.headers.get("authorization", "")
     if not auth.lower().startswith("bearer "):
         raise ApiError(401, "UNAUTHENTICATED", "Missing bearer token")
+    token = auth[7:]
     try:
+        signing_key = _jwks_client.get_signing_key_from_jwt(token)
         payload = jwt.decode(
-            auth[7:],
-            settings.supabase_jwt_secret,
-            algorithms=["HS256"],
+            token,
+            signing_key.key,
+            algorithms=["ES256", "RS256"],
             audience="authenticated",
         )
     except jwt.PyJWTError:

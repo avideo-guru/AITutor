@@ -8,7 +8,7 @@ Supabase Postgres + pgvector, DeepSeek/Gemini behind a single adapter file.
 1. Create a Supabase project. Run `schema.sql` in the SQL editor. Create a
    **public storage bucket** named `question-images`.
 2. `cp .env.example .env` and fill in the values (Supabase → Settings →
-   Database for `DATABASE_URL`, Settings → API for `SUPABASE_JWT_SECRET`).
+   Database for `DATABASE_URL`, Settings → API for `SUPABASE_URL`).
 3. Install & run:
 
    ```sh

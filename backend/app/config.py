@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     # Empty defaults keep imports side-effect free (tests, tooling); anything
     # unset fails loudly at first use, not at import.
     database_url: str = ""
-    supabase_jwt_secret: str = ""
 
     supabase_url: str = ""
     supabase_service_role_key: str = ""
