@@ -138,9 +138,12 @@ Verified free-tier facts + required changes, for whoever runs the deploy:
 1. **🔴 Code blocker: `gemini-2.5-pro` is NOT on the Gemini free tier anymore**
    (2.5 Flash / Flash-Lite are; embeddings `gemini-embedding-001` is). Our
    Gemini adapter hardcodes 2.5-pro → every vision/failover call fails on a
-   free key. Fix queued on the P1 branch (configurable `GEMINI_MODEL`, default
-   `gemini-2.5-flash` for this phase). Free Flash limits: 10 RPM / 250 req/day,
-   resets midnight PT — plenty for the prove-it.
+   free key. **Fix LANDED on the P1 branch (33e9d09):** adapter reads
+   `GEMINI_MODEL` env at call time (default unchanged = 2.5-pro); zero-spend
+   deploys add `GEMINI_MODEL=gemini-2.5-flash` to `--set-env-vars`. Free Flash
+   limits: 10 RPM / 250 req/day, resets midnight PT — plenty for the prove-it.
+   ⇒ the prove-it/deploy should therefore run against the **P1 branch build**
+   (or wait for P1's merge) — `main`'s adapter can't do ₹0 vision.
 2. **Hard cap = two GCP projects.** Gemini API key from an AI Studio project
    with **no billing attached** (can't be charged — over-limit = 429, not a
    bill). Cloud Run lives in a separate project with billing + a kill switch:
