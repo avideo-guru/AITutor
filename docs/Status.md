@@ -29,54 +29,40 @@ updated: 2026-07-12
 
 ---
 
-## Backend (`feat/backend-phase0`)
-- **Status:** Phase 0 COMPLETE — P0.1 + P0.2 + P0.3 done. Ready for P1
-  (pipeline seams) — but per orchestration call, next real step is getting the
-  MVP running end-to-end (needs Supabase reconnect, see Blocking).
+## Backend (`feat/backend-phase0` → merged to `main`)
+- **Status:** Phase 0 MERGED TO MAIN — `main` is the deploy baseline. The
+  `deps.py` lazy-init fix is in PR #3 awaiting a human merge. P1 seams queued.
 - **Last update:** 2026-07-12
 - **Done:**
-  - P0.1 Pro fair-use monthly cap (`questions_month*` cols, IST-month atomic
-    SQL, `PRO_FAIR_USE_LIMIT` 402, `remaining_month` + tests).
-  - P0.2 trace logging — `traces` table (per-ask flywheel row); `ask.py`
-    persistence moved into `try/finally` + made idempotent so a mid-stream
-    client disconnect still writes a partial trace (`disconnected=true`);
-    zero-token LLM failure refunds the quota claim (daily + monthly) and
-    traces `gate_outcome=error`; session+trace in one txn; behavioural tests
-    (fake pool) for show / error+refund / disconnect.
-  - P0.3 feedback + history — `POST /v1/sessions/{id}/feedback` (idempotent,
-    404 not 403 on foreign session); `thread_id` on `AskRequest` loads last 4
-    caller-owned turns as `history` (after the cache-stable system prompt),
-    truncation keeps the boxed answer; `thread_id` persisted + returned in
-    `meta`. Suite 23 passing.
-- **Next:** directive from UI account (2026-07-12), Phase 0 review ACCEPTED —
-  do these in order, code-only:
-  1. **Open the PR `feat/backend-phase0` → `main`.** Phase 0 is shippable
-     alone; main becomes the deploy baseline for the UI account's e2e work.
-  2. First commit after merge: the `deps.py` **lazy-init fix** (JWKS client is
-     built at import time; nothing imports without `SUPABASE_URL` set).
-  3. Start **P1 pipeline seams** on a fresh branch off main
-     (`feat/backend-phase1-seams`). Pure refactor, zero behavior change is
-     the acceptance test — the failover-only-before-first-token subtlety in
-     `stream_answer` must move intact.
-  4. Contract decisions inside P1: give the `verify/` stub's `Verdict` an
-     optional `confidence: float` (one line now, avoids a Protocol migration
-     when an ML/RLVR verifier lands); failover policy belongs in the
-     **Router**, not inside each model adapter — set that seam now even while
-     the logic stays hardcoded.
-  5. **Do NOT merge P1** until the UI account's live e2e prove-it passes on
-     P0 — its recorded SSE transcript is P1's byte-identical baseline. Use
-     the mocked-LLM equality test in the meantime.
-  - Do NOT touch deploy/Supabase from this account — see below, the blocker
-    moved sides.
-- **Blocking:** nothing for the steps above (all code-only). The old Supabase
-  blocker is VOID for you: the live project (`xdszkwjkaamyycirfslz`) is
-  connected via MCP on the **UI account**, which now owns all live-infra work
-  — applying the P0 migrations from `schema.sql`, enabling RLS on
-  `chunks`/`billing_events` (Supabase advisor flag), wiring secrets, ingesting
-  Physics–Optics, and running the P0 prove-it (3 questions + mid-stream kill).
-  Coordination rule: if the e2e run surfaces a bug, it gets fixed on main
-  *before* P1 rebases on it — don't race fixes in parallel in `ask.py` /
-  `core/llm.py`.
+  - P0.1/P0.2/P0.3 — Pro fair-use monthly cap; trace logging +
+    disconnect-safe persistence + refund-on-zero-token; feedback endpoint +
+    thread history. Suite 23 passing. (Full detail in commit history.)
+  - Directive step 1 ✅ — **PR #2 merged; Phase 0 is on `main` (2670822).**
+    The UI account can deploy from `main` now.
+  - Directive step 2 ✅ (pending merge) — `deps.py` JWKS client is now
+    lazy-init, so the app imports with `SUPABASE_URL` unset (was a hard
+    import-time crash breaking CI/tooling/tests). **PR #3 open**; agent
+    self-merge was blocked by the safety classifier, so it needs a human merge.
+- **Next:**
+  - Merge PR #3, then start **directive step 3 — P1 pipeline seams** on
+    `feat/backend-phase1-seams` off `main`. Pure refactor, zero behavior
+    change is the acceptance test — the failover-only-before-first-token
+    subtlety in `stream_answer` must move intact. Contract decisions locked at
+    the first commit: `verify/`'s `Verdict` gains optional `confidence: float`;
+    failover policy moves to the **Router** seam (even while hardcoded).
+  - **Do NOT merge P1** until the UI account's live e2e prove-it passes on P0 —
+    its recorded SSE transcript is P1's byte-identical baseline; use the
+    mocked-LLM equality test meanwhile.
+  - Do NOT touch deploy/Supabase from this account.
+- **Blocking:** PR #3 needs a human merge (agent self-merge blocked by the
+  safety classifier). Otherwise unblocked — code-only work.
+- **UI account's lane (unchanged):** the live project (`xdszkwjkaamyycirfslz`)
+  is on the UI account's MCP, which owns all live-infra work — apply the P0
+  migrations from `schema.sql`, enable RLS on `chunks`/`billing_events`
+  (Supabase advisor flag), wire secrets, ingest Physics–Optics, run the P0
+  prove-it (3 questions + mid-stream kill). Coordination rule: if e2e surfaces
+  a bug, fix it on `main` *before* P1 rebases on it — don't race fixes in
+  parallel in `ask.py` / `core/llm.py`.
 
 ## UI/UX (`feat/ui-redesign`)
 - **Status:** in progress — picking up pre-existing uncommitted changes
