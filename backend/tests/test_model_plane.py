@@ -27,6 +27,55 @@ def test_verdict_carries_optional_confidence():
     assert Outcome.INAPPLICABLE.value == "inapplicable"
 
 
+# --- zero-spend phase: configurable Gemini model ---
+
+def test_gemini_model_is_configurable_and_cost_tolerant():
+    from app.config import settings
+    from app.models.base import PRICES, cost
+    assert settings.gemini_model == "gemini-2.5-pro"       # default unchanged
+    assert "gemini-2.5-flash" in PRICES                     # flash meters properly
+    assert cost("some-future-model", 1000, 1000) == 0.0     # unknown -> 0, no crash
+
+
+def test_gemini_adapter_reads_model_from_settings(monkeypatch):
+    from app.config import settings
+    captured = {}
+
+    class FakeResp:
+        def raise_for_status(self): ...
+        async def aiter_lines(self):
+            return
+            yield  # empty stream; adapter still yields final Usage
+
+    class FakeStreamCtx:
+        def __init__(self, url):
+            captured["url"] = url
+        async def __aenter__(self):
+            return FakeResp()
+        async def __aexit__(self, *a):
+            return False
+
+    class FakeClient:
+        def __init__(self, *a, **k): ...
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *a):
+            return False
+        def stream(self, method, url, **kw):
+            return FakeStreamCtx(url)
+
+    monkeypatch.setattr(gemini.httpx, "AsyncClient", FakeClient)
+    monkeypatch.setattr(settings, "gemini_model", "gemini-2.5-flash")
+
+    async def run():
+        return [item async for item in gemini.stream(
+            [{"role": "user", "content": "q"}], None)]
+
+    out = asyncio.run(run())
+    assert "gemini-2.5-flash:streamGenerateContent" in captured["url"]
+    assert out[-1].model == "gemini-2.5-flash"              # Usage carries it
+
+
 # --- routing + failover (the load-bearing subtlety) ---
 
 def _collect(messages, image_url):

@@ -19,11 +19,16 @@ class Usage:
 PRICES = {
     "deepseek-chat": {"in": 0.28e-6, "in_cached": 0.028e-6, "out": 0.42e-6},
     "gemini-2.5-pro": {"in": 1.25e-6, "in_cached": 1.25e-6, "out": 10.0e-6},
+    "gemini-2.5-flash": {"in": 0.30e-6, "in_cached": 0.30e-6, "out": 2.5e-6},
 }
 
 
 def cost(model: str, tokens_in: int, tokens_out: int, cached: int = 0) -> float:
-    p = PRICES[model]
+    """Metering only. Unknown model -> 0.0 rather than crashing the stream's
+    final Usage yield — a missing price row must never kill an answer."""
+    p = PRICES.get(model)
+    if p is None:
+        return 0.0
     fresh = max(tokens_in - cached, 0)
     return round(fresh * p["in"] + cached * p["in_cached"] + tokens_out * p["out"], 6)
 

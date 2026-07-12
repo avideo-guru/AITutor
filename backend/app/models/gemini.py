@@ -1,5 +1,8 @@
 """Gemini adapter (vision + failover Reasoner). Handles photographed problems
-(inline image) and stands in when DeepSeek fails before its first token."""
+(inline image) and stands in when DeepSeek fails before its first token.
+
+The model name comes from settings (GEMINI_MODEL env): 2.5-pro on paid tier,
+2.5-flash during the zero-spend phase (2.5-pro has no free tier)."""
 
 import base64
 import json
@@ -10,12 +13,14 @@ import httpx
 from app.config import settings
 from app.models.base import Usage, cost
 
+# Kept for callers/tests that reference the paid-tier default by name.
 MODEL = "gemini-2.5-pro"
 
 
 async def stream(
     messages: list[dict], image_url: str | None
 ) -> AsyncIterator[str | Usage]:
+    model = settings.gemini_model  # read at call time, not import time
     system = next((m["content"] for m in messages if m["role"] == "system"), "")
     contents = []
     for m in messages:
@@ -39,7 +44,7 @@ async def stream(
     tokens_in = tokens_out = 0
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{MODEL}:streamGenerateContent"
+        f"{model}:streamGenerateContent"
     )
     async with httpx.AsyncClient(timeout=httpx.Timeout(120, connect=10)) as client:
         async with client.stream(
@@ -65,4 +70,4 @@ async def stream(
                     for part in cand.get("content", {}).get("parts", []):
                         if part.get("text"):
                             yield part["text"]
-    yield Usage(MODEL, tokens_in, tokens_out, cost(MODEL, tokens_in, tokens_out))
+    yield Usage(model, tokens_in, tokens_out, cost(model, tokens_in, tokens_out))

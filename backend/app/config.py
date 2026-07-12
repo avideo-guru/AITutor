@@ -13,6 +13,11 @@ class Settings(BaseSettings):
 
     deepseek_api_key: str = ""
     gemini_api_key: str = ""
+    # Which Gemini model the adapter calls (vision + failover). Zero-spend
+    # phase runs "gemini-2.5-flash" — 2.5-pro is NOT on the Gemini free tier
+    # (see docs/Status.md § zero-spend guardrails). Default = paid-tier model
+    # so behavior is unchanged unless explicitly configured.
+    gemini_model: str = "gemini-2.5-pro"
 
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
