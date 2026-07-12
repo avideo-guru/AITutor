@@ -194,6 +194,64 @@ def test_disconnect_persists_partial_trace_without_refund():
     assert "disconnected" in trace_args and trace_args[-1] is True
 
 
+# --- SSRF guard (review finding, fixed on P1) ---
+
+ALLOWED_BASE = "https://proj.supabase.co"
+ALLOWED_IMG = ALLOWED_BASE + "/storage/v1/object/public/question-images/x.jpg"
+
+
+def test_bad_image_url_rejected_before_quota():
+    # No SUPABASE_URL configured in tests -> fail closed; and the reject must
+    # happen BEFORE the quota claim (a bad image never burns a question).
+    pool = _setup(_capture_stream({}))
+
+    async def run():
+        await ask(AskRequest(image_url="https://evil.example/pwn.png"),
+                  profile=_profile())
+
+    with pytest.raises(ApiError) as ei:
+        asyncio.run(run())
+    assert ei.value.status == 400 and ei.value.code == "INVALID_IMAGE_URL"
+    assert "quota_claim" not in [k for k, _ in pool.log]
+
+
+def test_allowed_image_url_passes(monkeypatch):
+    from app.config import settings
+    monkeypatch.setattr(settings, "supabase_url", ALLOWED_BASE)
+    captured = {}
+    pool = _setup(_capture_stream(captured))
+
+    async def run():
+        resp = await ask(AskRequest(image_url=ALLOWED_IMG), profile=_profile())
+        return "".join(await _drain(resp))
+
+    body = asyncio.run(run())
+    assert "quota_claim" in [k for k, _ in pool.log]
+    assert "event: done" in body
+
+
+def test_image_rejected_refunds_and_emits_specific_code(monkeypatch):
+    from app.config import settings
+    from app.models.base import ImageRejected
+    monkeypatch.setattr(settings, "supabase_url", ALLOWED_BASE)
+
+    async def fake_stream(messages, image_url):
+        raise ImageRejected("too large")
+        yield  # unreachable; makes this an async generator
+
+    pool = _setup(fake_stream)
+
+    async def run():
+        resp = await ask(AskRequest(image_url=ALLOWED_IMG), profile=_profile())
+        return "".join(await _drain(resp))
+
+    body = asyncio.run(run())
+    kinds = [k for k, _ in pool.log]
+    assert "refund" in kinds                     # zero tokens -> claim reversed
+    assert "IMAGE_REJECTED" in body              # specific, actionable error
+    assert "LLM_UNAVAILABLE" not in body
+
+
 # --- P0.3: history + feedback ---
 
 def _capture_stream(captured):

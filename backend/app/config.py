@@ -28,5 +28,21 @@ class Settings(BaseSettings):
     pro_monthly_limit: int = 1500
     sentry_dsn: str = ""
 
+    # SSRF guard for /v1/ask image_url (the backend fetches it server-side).
+    # Empty prefix -> derived from supabase_url (the app's upload bucket);
+    # if neither is set, image questions are rejected (fail closed).
+    image_url_allowed_prefix: str = ""
+    max_image_bytes: int = 4 * 1024 * 1024
+
 
 settings = Settings()
+
+
+def allowed_image_prefix() -> str | None:
+    """The only URL prefix the backend will fetch images from. None = no
+    prefix configured -> reject all image questions (fail closed, SSRF)."""
+    if settings.image_url_allowed_prefix:
+        return settings.image_url_allowed_prefix
+    if settings.supabase_url:
+        return f"{settings.supabase_url}/storage/v1/object/public/"
+    return None

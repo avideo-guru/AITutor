@@ -76,6 +76,62 @@ def test_gemini_adapter_reads_model_from_settings(monkeypatch):
     assert out[-1].model == "gemini-2.5-flash"              # Usage carries it
 
 
+# --- SSRF fetch guard in the Gemini adapter ---
+
+def _fake_image_client(headers, chunks, status=200):
+    class FakeResp:
+        status_code = status
+        def __init__(self):
+            self.headers = headers
+        async def aiter_bytes(self):
+            for c in chunks:
+                yield c
+
+    class FakeStreamCtx:
+        async def __aenter__(self):
+            return FakeResp()
+        async def __aexit__(self, *a):
+            return False
+
+    class FakeClient:
+        def __init__(self, *a, **k): ...
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *a):
+            return False
+        def stream(self, method, url, **kw):
+            return FakeStreamCtx()
+    return FakeClient
+
+
+def test_image_fetch_rejects_non_image(monkeypatch):
+    from app.models.base import ImageRejected
+    monkeypatch.setattr(
+        gemini.httpx, "AsyncClient",
+        _fake_image_client({"content-type": "text/html"}, [b"<html>"]))
+    with pytest.raises(ImageRejected):
+        asyncio.run(gemini._fetch_image("https://ok/img.png"))
+
+
+def test_image_fetch_rejects_oversize_mid_stream(monkeypatch):
+    from app.config import settings
+    from app.models.base import ImageRejected
+    monkeypatch.setattr(settings, "max_image_bytes", 10)
+    monkeypatch.setattr(
+        gemini.httpx, "AsyncClient",
+        _fake_image_client({"content-type": "image/jpeg"}, [b"x" * 8, b"x" * 8]))
+    with pytest.raises(ImageRejected):
+        asyncio.run(gemini._fetch_image("https://ok/img.jpg"))
+
+
+def test_image_fetch_accepts_valid_image(monkeypatch):
+    monkeypatch.setattr(
+        gemini.httpx, "AsyncClient",
+        _fake_image_client({"content-type": "image/png"}, [b"pngdata"]))
+    ctype, data = asyncio.run(gemini._fetch_image("https://ok/img.png"))
+    assert ctype == "image/png" and data == b"pngdata"
+
+
 # --- routing + failover (the load-bearing subtlety) ---
 
 def _collect(messages, image_url):

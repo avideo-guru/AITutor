@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, model_validator
 
-from app.config import settings
+from app.config import allowed_image_prefix, settings
 from app.db import get_pool
 from app.deps import get_profile
 from app.errors import ApiError
@@ -82,6 +82,18 @@ async def _claim_quota(pool, profile: dict) -> None:
 
 @router.post("/v1/ask")
 async def ask(body: AskRequest, profile: dict = Depends(get_profile)):
+    # SSRF guard: the backend fetches image_url server-side (Gemini vision), so
+    # only the app's own upload bucket is fetchable. Checked BEFORE the quota
+    # claim — a rejected image must not consume a question. Fail closed when no
+    # prefix is configured.
+    if body.image_url:
+        prefix = allowed_image_prefix()
+        if prefix is None or not body.image_url.startswith(prefix):
+            raise ApiError(
+                400, "INVALID_IMAGE_URL",
+                "Images must be uploaded through the app before asking.",
+            )
+
     pool = get_pool()
     await _claim_quota(pool, profile)
     return StreamingResponse(

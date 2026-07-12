@@ -11,10 +11,39 @@ from typing import AsyncIterator
 import httpx
 
 from app.config import settings
-from app.models.base import Usage, cost
+from app.models.base import ImageRejected, Usage, cost
 
 # Kept for callers/tests that reference the paid-tier default by name.
 MODEL = "gemini-2.5-pro"
+
+
+async def _fetch_image(image_url: str) -> tuple[str, bytes]:
+    """Fetch the student's photo with SSRF-conscious transport rules: the URL
+    prefix was already allowlisted at the route; here we refuse redirects (no
+    bouncing to internal hosts), require an image content-type, and cap the
+    download at settings.max_image_bytes with a hard mid-stream abort (plan
+    edge case #5). Any failure -> ImageRejected, refunded upstream."""
+    try:
+        async with httpx.AsyncClient(timeout=30, follow_redirects=False) as client:
+            async with client.stream("GET", image_url) as r:
+                if r.status_code != 200:
+                    raise ImageRejected(f"image fetch returned {r.status_code}")
+                ctype = r.headers.get("content-type", "")
+                if not ctype.startswith("image/"):
+                    raise ImageRejected(f"not an image: {ctype or 'unknown type'}")
+                declared = r.headers.get("content-length")
+                if declared and int(declared) > settings.max_image_bytes:
+                    raise ImageRejected("image exceeds size limit")
+                buf = bytearray()
+                async for chunk in r.aiter_bytes():
+                    buf.extend(chunk)
+                    if len(buf) > settings.max_image_bytes:
+                        raise ImageRejected("image exceeds size limit")
+        return ctype, bytes(buf)
+    except ImageRejected:
+        raise
+    except httpx.HTTPError as e:
+        raise ImageRejected(f"image fetch failed: {e!r}") from e
 
 
 async def stream(
@@ -31,13 +60,11 @@ async def stream(
              "parts": [{"text": m["content"]}]}
         )
     if image_url and contents:
-        async with httpx.AsyncClient(timeout=30) as client:
-            img = await client.get(image_url)
-            img.raise_for_status()
+        mime_type, data = await _fetch_image(image_url)
         contents[-1]["parts"].append({
             "inline_data": {
-                "mime_type": img.headers.get("content-type", "image/jpeg"),
-                "data": base64.b64encode(img.content).decode(),
+                "mime_type": mime_type,
+                "data": base64.b64encode(data).decode(),
             }
         })
 

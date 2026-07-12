@@ -15,6 +15,13 @@ class Usage:
     cost_usd: float
 
 
+class ImageRejected(Exception):
+    """The question's image couldn't be used (too large, not an image, fetch
+    failed). Raised before any answer token streams, so the pipeline refunds
+    the quota claim and tells the student what to fix — not a generic LLM
+    error."""
+
+
 # Indicative mid-2026 list prices, USD per token — for metering, not billing.
 PRICES = {
     "deepseek-chat": {"in": 0.28e-6, "in_cached": 0.028e-6, "out": 0.42e-6},

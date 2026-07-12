@@ -20,7 +20,7 @@ from typing import AsyncIterator
 
 from app import sse
 from app.core.prompts import build_messages
-from app.models.base import Usage
+from app.models.base import ImageRejected, Usage
 from app.models.router import stream_answer
 from app.retrieval import vector
 
@@ -190,7 +190,7 @@ async def run(pool, profile: dict, body) -> AsyncIterator[str]:
                 else:
                     answer_parts.append(item)
                     yield sse.format_event(sse.TOKEN, {"t": item})
-        except Exception:
+        except Exception as exc:
             # LLM died. Failover already had its chance (only fires before the
             # first token, by design — that policy lives in the Router). Record
             # the failure as a trace.
@@ -204,8 +204,19 @@ async def run(pool, profile: dict, body) -> AsyncIterator[str]:
             else:
                 gate = "partial"
             await persist(disconnected=False, gate_outcome=gate)
-            yield sse.format_event(sse.ERROR, {"code": "LLM_UNAVAILABLE",
-                                               "message": "The tutor is unavailable. Try again."})
+            if isinstance(exc, ImageRejected):
+                # Image fetch/validation failed before any token — tell the
+                # student what to fix instead of blaming the tutor.
+                yield sse.format_event(sse.ERROR, {
+                    "code": "IMAGE_REJECTED",
+                    "message": "That image couldn't be used. Upload a photo "
+                               "under 4 MB (JPEG/PNG) and try again.",
+                })
+            else:
+                yield sse.format_event(sse.ERROR, {
+                    "code": "LLM_UNAVAILABLE",
+                    "message": "The tutor is unavailable. Try again.",
+                })
             return
 
         stage_latency["stream_ms"] = int((time.perf_counter() - stream_t0) * 1000)
