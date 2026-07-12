@@ -4,15 +4,10 @@ we can assert the happy path, the zero-token LLM failure (refund + error trace),
 and the client-disconnect path (partial trace, disconnected=true, NO refund)."""
 
 import asyncio
-import os
 import uuid
 from datetime import datetime
 
 import pytest
-
-# deps.py builds a PyJWKClient at import time and rejects an empty URL, so the
-# app package can't be imported without this set (pre-existing, not P0.2).
-os.environ.setdefault("SUPABASE_URL", "https://example.test")
 
 import app.routes.ask as ask_mod
 import app.routes.sessions as sess_mod
