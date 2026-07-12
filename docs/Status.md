@@ -81,9 +81,16 @@ updated: 2026-07-12
   scale-to-zero, Secret Manager, 600s SSE timeout). PR to `main` pending.
   *Backend account: the `$PORT` Dockerfile fix is on that branch — pull it
   before any deploy; it does NOT touch P1 files.*
+- **Done (Infra — live DB, 2026-07-12):** P0.1/P0.2/P0.3 applied to live
+  Supabase (`xdszkwjkaamyycirfslz`) as tracked migrations — now matches
+  `main`'s `schema.sql`. RLS enabled on `chunks`, `billing_events`, **and
+  `traces`** (new public table from P0.2, same exposure). All ERROR/critical
+  security advisors cleared; only benign `rls_enabled_no_policy` INFO remains
+  (backend uses direct asyncpg / service-role, which bypass RLS — no policy
+  needed). Pre-existing WARNs untouched (`vector` in `public`, Auth
+  leaked-password protection off).
 - **Next (Infra):**
-  - Apply P0 migrations + RLS to live Supabase (in-progress, parallel session).
-  - Then: install/auth `gcloud`, create Secret Manager secrets, run
+  - install/auth `gcloud`, create Secret Manager secrets, run
     `bash backend/deploy/cloudrun.sh` → get service URL.
   - Wire `frontend/.env` API base + Stripe webhook to the URL; ingest
     Physics–Optics; run the P0 prove-it (produces P1's baseline SSE transcript).
