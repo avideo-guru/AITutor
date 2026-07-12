@@ -46,7 +46,8 @@ async def get_profile(request: Request) -> dict:
         insert into profiles (id) values ($1)
         on conflict (id) do update set id = excluded.id
         returning id, exam_target, plan, stripe_customer_id, plan_expires_at,
-                  questions_today, questions_reset_on
+                  questions_today, questions_reset_on,
+                  questions_month, questions_month_reset_on
         """,
         user.id,
     )

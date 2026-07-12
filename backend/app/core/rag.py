@@ -14,7 +14,7 @@ async def retrieve(
     qvec = to_pgvector(await embed(question, task="RETRIEVAL_QUERY"))
     rows = await pool.fetch(
         """
-        select content, source_ref, 1 - (embedding <=> $1::vector) as similarity
+        select id, content, source_ref, 1 - (embedding <=> $1::vector) as similarity
         from chunks
         where ($2::text is null or chapter = $2)
         order by embedding <=> $1::vector

@@ -1,10 +1,11 @@
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 import httpx
 from fastapi import APIRouter, Depends
 
 from app.config import settings
-from app.core.quota import remaining_today
+from app.core.quota import remaining_month, remaining_today
 from app.db import get_pool
 from app.deps import get_profile
 
@@ -25,6 +26,13 @@ async def me(profile: dict = Depends(get_profile)):
             settings.free_daily_limit,
         ),
         "free_daily_limit": settings.free_daily_limit,
+        "questions_remaining_month": remaining_month(
+            profile["plan"], profile["questions_month"],
+            profile["questions_month_reset_on"],
+            datetime.now(ZoneInfo("Asia/Kolkata")).date(),
+            settings.pro_monthly_limit,
+        ),
+        "pro_monthly_limit": settings.pro_monthly_limit,
     }
 
 

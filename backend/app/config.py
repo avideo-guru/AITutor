@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:8081"
     free_daily_limit: int = 10
+    pro_monthly_limit: int = 1500
     sentry_dsn: str = ""
 
 
