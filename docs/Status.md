@@ -29,33 +29,36 @@ updated: 2026-07-12
 
 ---
 
-## Backend (`feat/backend-phase0` → merged to `main`)
-- **Status:** Phase 0 MERGED TO MAIN — `main` is the deploy baseline. The
-  `deps.py` lazy-init fix is in PR #3 awaiting a human merge. P1 seams queued.
+## Backend (P1 in progress on `feat/backend-phase1-seams`)
+- **Status:** Phase 0 + deps fix on `main`. **P1 pipeline seams STARTED** —
+  increment 1 (model plane split) done on `feat/backend-phase1-seams`; branch
+  open, NOT merged (see Rule). Deploy is the UI account's lane.
 - **Last update:** 2026-07-12
 - **Done:**
-  - P0.1/P0.2/P0.3 — Pro fair-use monthly cap; trace logging +
-    disconnect-safe persistence + refund-on-zero-token; feedback endpoint +
-    thread history. Suite 23 passing. (Full detail in commit history.)
-  - Directive step 1 ✅ — **PR #2 merged; Phase 0 is on `main` (2670822).**
-    The UI account can deploy from `main` now.
-  - Directive step 2 ✅ (pending merge) — `deps.py` JWKS client is now
-    lazy-init, so the app imports with `SUPABASE_URL` unset (was a hard
-    import-time crash breaking CI/tooling/tests). **PR #3 open**; agent
-    self-merge was blocked by the safety classifier, so it needs a human merge.
-- **Next:**
-  - Merge PR #3, then start **directive step 3 — P1 pipeline seams** on
-    `feat/backend-phase1-seams` off `main`. Pure refactor, zero behavior
-    change is the acceptance test — the failover-only-before-first-token
-    subtlety in `stream_answer` must move intact. Contract decisions locked at
-    the first commit: `verify/`'s `Verdict` gains optional `confidence: float`;
-    failover policy moves to the **Router** seam (even while hardcoded).
-  - **Do NOT merge P1** until the UI account's live e2e prove-it passes on P0 —
-    its recorded SSE transcript is P1's byte-identical baseline; use the
-    mocked-LLM equality test meanwhile.
-  - Do NOT touch deploy/Supabase from this account.
-- **Blocking:** PR #3 needs a human merge (agent self-merge blocked by the
-  safety classifier). Otherwise unblocked — code-only work.
+  - P0.1/P0.2/P0.3 on `main` (2670822) — fair-use cap; traces +
+    disconnect-safe persistence + refund; feedback endpoint + thread history.
+  - `deps.py` lazy-init fix + CLAUDE.md standing-instruction update
+    (PRs #3, #4) merged to `main` — app now imports with `SUPABASE_URL` unset.
+  - **P1 seams increment 1** (`feat/backend-phase1-seams`, commit d9b733b) —
+    pure refactor, zero behavior change. `core/llm.py` split into
+    `models/{deepseek,gemini,router,base}.py`; `core/llm.py` kept as a
+    re-export shim so `ask.py` is byte-identical (untouched). Failover policy
+    moved into the **Router** — failover-only-before-first-token moved intact
+    and now test-pinned. Added Protocol stubs: `verify/base.py` (`Verdict`
+    with optional `confidence`), `retrieval/base.py` (`Retriever`),
+    `tools/base.py` (`Tool`), `sse.py` (SSE event-protocol constants).
+    **29 tests** (23 behavioural preserved as the equivalence proof + 6 new).
+- **Next (P1 remaining increments, same branch):**
+  - `core/rag.py` → `retrieval/vector.py` implementing `Retriever` (shim kept).
+  - `routes/ask.py` → thin: an `orchestrator/pipeline.py` owns the stream/gate
+    loop + SSE emission (via `sse.py` constants); `ask.py` just parses request,
+    checks quota, calls the pipeline. Behaviour must stay byte-identical (the
+    23 behavioural tests are the guard).
+- **Rule:** **Do NOT merge P1** until the UI account's live e2e prove-it
+  passes on P0 — its recorded SSE transcript is P1's byte-identical baseline;
+  the mocked-LLM + 23 behavioural tests are the interim check. Do NOT touch
+  deploy/Supabase from this account.
+- **Blocking:** none — code-only. P1 merge waits on the UI account's e2e run.
 - **UI account's lane (unchanged):** the live project (`xdszkwjkaamyycirfslz`)
   is on the UI account's MCP, which owns all live-infra work — apply the P0
   migrations from `schema.sql`, enable RLS on `chunks`/`billing_events`
