@@ -98,6 +98,27 @@ updated: 2026-07-12
 - **Blocking:** actual `gcloud run deploy` needs a human-authenticated GCP CLI
   (account/auth can't be done by the agent) — script is ready to run.
 
+## 3-pass repo review (2026-07-12, UI account — full-branch audit)
+Findings both sides should see; details in the session, actionable bits here.
+- **Frontend lags backend by a phase:** P0.3 is "done" on `main` but the app
+  never sends `thread_id` (no follow-up questions) and has **no feedback UI**
+  (👍/👎 endpoint unused → the data flywheel isn't being fed). These are the
+  two highest-leverage UI tasks after the redesign merge.
+- **Backend security gap (pre-deploy fix):** `/v1/ask` `image_url` is fetched
+  server-side unvalidated in the Gemini path — SSRF on Cloud Run + no size/
+  content-type cap (plan edge case #5 not yet implemented). Fix: allowlist the
+  Supabase storage URL prefix, cap ~4MB, check content-type. Backend lane.
+- **Missing endpoint:** no `GET /v1/sessions/{id}` — thread screen paginates
+  up to 5 pages client-side to find one session; sessions older than ~100
+  entries show "not found". Small backend add + frontend switch.
+- **Critical path unchanged:** nothing is live e2e (gcloud deploy blocked on
+  human auth), corpus is empty until Physics–Optics ingest → P0 prove-it →
+  P1 merge. Everything else queues behind this.
+- **Untracked market-impact items (no owner on this board):** the 100-problem
+  Phase-0 dataset (gates P3 evals + P5 verifier — zero code, pure curation);
+  institute design-partner conversations (the 90-day kill test); Razorpay/UPI
+  vs Stripe for ₹299 India B2C; WhatsApp funnel. Suggest assigning lanes.
+
 ## Connections
 - Tracks execution of → [[Opus-Execution-Plan]]
 - Hub → [[Startup-MOC]]
