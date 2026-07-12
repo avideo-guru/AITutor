@@ -1,3 +1,4 @@
+import functools
 from dataclasses import dataclass
 
 import jwt
@@ -7,9 +8,17 @@ from app.config import settings
 from app.db import get_pool
 from app.errors import ApiError
 
+
 # Cached client fetches Supabase's public signing keys from its JWKS endpoint,
-# so this verifies tokens under key rotation without a shared secret.
-_jwks_client = jwt.PyJWKClient(f"{settings.supabase_url}/auth/v1/.well-known/jwks.json")
+# so this verifies tokens under key rotation without a shared secret. Built
+# lazily on first auth (not at import): PyJWKClient validates the URL in its
+# constructor, so eager init would make the whole app un-importable whenever
+# SUPABASE_URL is unset (CI, tooling, tests).
+@functools.lru_cache(maxsize=1)
+def _get_jwks_client() -> jwt.PyJWKClient:
+    return jwt.PyJWKClient(
+        f"{settings.supabase_url}/auth/v1/.well-known/jwks.json"
+    )
 
 
 @dataclass
@@ -25,7 +34,7 @@ async def get_current_user(request: Request) -> AuthUser:
         raise ApiError(401, "UNAUTHENTICATED", "Missing bearer token")
     token = auth[7:]
     try:
-        signing_key = _jwks_client.get_signing_key_from_jwt(token)
+        signing_key = _get_jwks_client().get_signing_key_from_jwt(token)
         payload = jwt.decode(
             token,
             signing_key.key,
