@@ -265,6 +265,12 @@ the traces (P0) to be provable. Spec: [[Verification-Engine]]; placement:
 [[Target-Architecture]] §6 (post-stream async, never blocking — the Photomath
 latency lesson). Scope: **curated-bank math/physics-numerical only** (v1).
 
+- **P5.0 Dependencies (checked against `backend/requirements.txt`, which today
+  has neither):** add `sympy` (symbolic engine + `parse_latex`, needs the
+  `antlr4-python3-runtime` extra) and `pint` (units) pinned to specific
+  versions; `sympy`'s LaTeX parser can hang on malformed input, so checkers
+  must run in a `ProcessPoolExecutor` with a hard timeout (see P5.3), not
+  in-process — a hang in-process blocks the whole async event loop.
 - **P5.1 Structured steps:** prompt update forcing delimited steps
   (`<step n>…</step>` with a final `<answer>` block, LaTeX inside). Eval before
   proceeding — structure must not cost answer accuracy (it sometimes does;
