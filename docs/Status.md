@@ -67,15 +67,29 @@ updated: 2026-07-12
   a bug, fix it on `main` *before* P1 rebases on it — don't race fixes in
   parallel in `ask.py` / `core/llm.py`.
 
-## UI/UX (`feat/ui-redesign`)
-- **Status:** in progress — picking up pre-existing uncommitted changes
+## UI/UX + Infra (`feat/ui-redesign`, `feat/deploy-cloudrun`)
+- **Status:** in progress — UI redesign + owns live-infra/deploy lane
 - **Last update:** 2026-07-12
-- **Done:** (carried over, not yet committed) modified `index.tsx`,
+- **Done (UI):** (carried over, not yet committed) modified `index.tsx`,
   `sign-in.tsx`, `thread/[id].tsx`, `Bubble.tsx`, `Input.tsx`, `Screen.tsx`,
   `theme.ts`; new `Branches.tsx`/`.web.tsx`, `Brand.tsx`, `Composer.tsx`,
   `DottedBackground.tsx`, `GoogleG.tsx`/`.web.tsx`, `entrance.ts`/`.web.ts`
-- **Next:** review + commit the above, continue redesign pass
-- **Blocking:**
+- **Done (Infra):** Cloud Run deploy prep on `feat/deploy-cloudrun` (off
+  `main`) — **fixed `backend/Dockerfile`** to honor `$PORT` (was hardcoded
+  8080; Cloud Run contract) + `exec` for SIGTERM SSE drain; added
+  `backend/deploy/cloudrun.sh` (deploy-from-source, `asia-south1`,
+  scale-to-zero, Secret Manager, 600s SSE timeout). PR to `main` pending.
+  *Backend account: the `$PORT` Dockerfile fix is on that branch — pull it
+  before any deploy; it does NOT touch P1 files.*
+- **Next (Infra):**
+  - Apply P0 migrations + RLS to live Supabase (in-progress, parallel session).
+  - Then: install/auth `gcloud`, create Secret Manager secrets, run
+    `bash backend/deploy/cloudrun.sh` → get service URL.
+  - Wire `frontend/.env` API base + Stripe webhook to the URL; ingest
+    Physics–Optics; run the P0 prove-it (produces P1's baseline SSE transcript).
+- **Next (UI):** review + commit the carried-over redesign changes.
+- **Blocking:** actual `gcloud run deploy` needs a human-authenticated GCP CLI
+  (account/auth can't be done by the agent) — script is ready to run.
 
 ## Connections
 - Tracks execution of → [[Opus-Execution-Plan]]
