@@ -1,6 +1,6 @@
 ---
 tags: [type/status, domain/startup]
-updated: 2026-07-15
+updated: 2026-07-16
 ---
 # 🛰️ Status — cross-account orchestration board
 
@@ -61,10 +61,33 @@ updated: 2026-07-15
   image questions 400).
 - **Blocking:** none.
 
-## Adaptive-loop architecture — NEW lane proposal (2026-07-15, UI account)
-- **Status:** design doc ready for review —
-  **[PR #6](https://github.com/aksharaverse/AITutor/pull/6)** adds
-  [[Adaptive-Loop-Architecture]] (`docs/Architecture/`). Docs only, no code.
+## Adaptive-loop architecture — **DESIGN DONE, A.0 IS BUILDABLE** (2026-07-16)
+- **Status:** [[Adaptive-Loop-Architecture]] merged to `main` via
+  **[PR #6](https://github.com/aksharaverse/AITutor/pull/6)**; review
+  refinements + the implementation-start section are in
+  **[PR #7](https://github.com/aksharaverse/AITutor/pull/7)** (open — merge
+  this before starting A.0, it's what defines A.0). Docs only, no code yet.
+- **👉 Next physical step = Phase A.0** (§7 of the doc): one PR, ~1 day, ₹0 —
+  `adaptive/contracts.py` + `verify/contracts.py` + `verify/registry.py` +
+  `verify/checkers/gold.py` + tests. **No migrations, no routes, no deps, no
+  behavior change** — cannot touch `/v1/ask`; the 38 tests stay green. Then
+  A.1 migrations → A.2 KC graph seed → A.3 item bank → B.1 Elo → B.2 routes →
+  B.3 UI (order + gates in §7).
+- **Why contracts first:** implementations churn (Elo → Student-JEPA; one
+  checker → six), contracts don't. `KnowledgeState`, `Verdict`, and the
+  `p_correct`-as-portable-unit convention get frozen before anything is built
+  against them. Same discipline as P1's seams.
+- **Review outcome (2026-07-16), things both sides should know:**
+  - Phases A/B are **"JEPA-inspired"**, NOT JEPA — the name is only earned in
+    Phase C, when an encoder actually predicts future latent states. Please use
+    this wording externally (investors/paper); the earlier framing overstated it.
+  - The verifier is a **Verification *Engine*** (registry + per-domain
+    checkers: sympy · units · gold · chemistry · sandbox · SMT), not one
+    checker. P5's checkers become registry entries — backend lane, note this.
+  - **Event sourcing is now a rule:** `attempts`/`traces` append-only;
+    `student_kc_state` is a *derived cache* that must be rebuildable by
+    replaying the log. That property is what makes the Phase C estimator swap
+    a re-run instead of a migration.
 - **What it is:** the 2026-07-15 brainstorm (JEPA papers + Squirrel AI's
   closed loop + Cursor's loop→data→model sequence) compressed into a design
   on the existing stack: closed practice loop where the LLM is a *selectively
@@ -82,8 +105,13 @@ updated: 2026-07-15
   Phase A/B server side (migrations + `adaptive/` + `routes/practice.py`,
   meshes after P1, parallel to P2/P3); UI account — practice screen + the
   missing feedback UI (same screen). Phase C is a research lane.
-- **Blocking:** none — but don't start Phase B until PR #6 is reviewed/merged
-  and the item-bank sourcing (~150 items for one chapter) has an owner.
+- **Blocking:** nothing blocks A.0/A.1/A.2/B.1 — start now.
+  **The one human blocker is A.3:** sourcing ~150 items for the first chapter
+  (NCERT exemplar + past JEE papers, same sourcing/attribution as the P3 golden
+  set) **needs an owner** — it's curation hours, not code, and it's the line
+  item this plan most underestimates. Tag the P3 golden problems with `kc_id`
+  and they become the first items for free. First chapter should be whichever
+  the golden set seeds from (Physics–Optics is already queued for ingest).
 
 ## UI/UX + Infra (`feat/ui-redesign`, `feat/deploy-cloudrun`)
 - **Status:** in progress — UI redesign + owns live-infra/deploy lane
