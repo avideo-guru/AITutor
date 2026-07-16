@@ -6,6 +6,12 @@ gets rewritten; the routes get rewritten. `KnowledgeState`, `StateDelta`, and
 the `p_correct` convention are what survive — freezing them now costs a day and
 saves a migration later.
 
+The decisions here that look arbitrary are recorded in `docs/Decisions/`:
+[[ADR-002]] (`observe(ev, prior)`), [[ADR-005]] (`p_correct`, not `rating`),
+[[ADR-006]] (state is a rebuildable cache), [[ADR-007]] (Elo first),
+[[ADR-010]] (pydantic here, dataclasses in `verify/`). Read the record before
+changing any of them — each exists to prevent a specific failure.
+
 Four rules make these contracts load-bearing rather than decorative. Each is
 enforced by a test in `tests/test_adaptive_contracts.py`:
 

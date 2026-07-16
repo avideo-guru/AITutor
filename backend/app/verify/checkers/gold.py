@@ -7,7 +7,8 @@ backstop the P5 badge copy leans on: symbolic step checks can pass a
 consistent-but-wrongly-modeled solution, and only a gold final answer catches
 that ([[Viability-Brutal-Honesty]] §1.5).
 
-Deliberately narrow, because A.0 adds no dependencies:
+Deliberately narrow, because A.0 adds no dependencies (the unit limitation and
+its expiry date are [[ADR-009]] in `docs/Decisions/`):
 
   - **numeric** — relative tolerance 1e-3 (the P3 grading tolerance).
   - **units** — normalized *string* compare, NOT dimensional analysis. `m/s^2`

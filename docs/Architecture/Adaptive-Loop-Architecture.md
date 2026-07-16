@@ -573,6 +573,12 @@ backend/tests/test_adaptive_contracts.py   # 38 tests
 backend/tests/test_verify_registry.py      # 39 tests
 ```
 
+> **Both corrections below, and the other load-bearing "why is this weird?"
+> calls from A.0, are recorded as one-screen ADRs in
+> [`docs/Decisions/`](../Decisions/README.md) — read those before changing any
+> of it. Correction 1 = [[ADR-001]], correction 2 = [[ADR-002]], the unit
+> limitation = [[ADR-009]].**
+
 **🔧 Correction 1 — `verify/base.py`, not `verify/contracts.py`.** This spec was
 written without noticing that **P1 already shipped `verify/base.py`** carrying
 `Outcome`/`Verdict`/`Verifier` (its docstring calls the `confidence` decision
@@ -645,7 +651,9 @@ so start now and assign in parallel.
 problems become the first items for free.
 
 ## Connections
-- Extends → [[Student-Model]] (resolves its v1-mastery decision: Elo) ·
+- Decisions → [`docs/Decisions/`](../Decisions/README.md) (ADR-001…010 — the
+  "why is this weird?" records; write one when a future reader would ask)
+- Extends → [[Student-Model]] (resolves its v1-mastery decision: Elo, [[ADR-007]]) ·
   Plugs into → [[Opus-Execution-Plan]] (P1 seams, P3 golden set, P5 verifier)
 - Economics guard → [[Viability-Brutal-Honesty]] §3.1 · Moat logic →
   [[Durable-Moat]] · Verifier spec → [[Verification-Engine]]

@@ -21,7 +21,9 @@ updated: 2026-06-28
 - [[Cognitive-Architecture]] — the 5 layers + the model router. We build an "AI OS," not a chatbot.
 - [[Verification-Engine]] — 🥇 **the moat**. "LLM proposes, math disposes." (deep dive → [[A1-Math-Verified-Tutor-Dev-Plan]] §1)
 - [[Retrieval-Knowledge-Layer]] — retrieve *knowledge*, not documents. Content quality > model.
-- [[Student-Model]] — the "active student state": intent, memory, misconceptions, mastery (BKT/IRT).
+- [[Student-Model]] — the "active student state": intent, memory, misconceptions, mastery (BKT/IRT). v1 mastery = **Elo** ([[ADR-007]]).
+- [[Adaptive-Loop-Architecture]] — 🆕 the closed adaptive loop: the LLM as a *selectively invoked decoder*, Elo → Student-JEPA, phases A–D with gates. Research links + schema + roadmap. **A.0 shipped.**
+- [ADRs → `docs/Decisions/`](Decisions/README.md) — 🆕 tiny records of decisions that look weird without their reason. Read one before "fixing" something odd.
 
 ## 🎁 Product surface
 - [[PRD]] — 🆕 the combined BRD/PRD: personas, functional requirements (F1–F7), NFRs (incl. DPDP), release plan, metrics.

@@ -7,7 +7,7 @@ happens: it asks every registered checker whether it applies, runs the ones that
 do, and folds their verdicts into one gate outcome.
 
 The aggregation precedence is the whole point, so it is stated once here and
-tested as a truth table:
+tested as a truth table ([[ADR-003]] for why, [[ADR-004]] for the raising case):
 
     FAIL  >  TIMEOUT  >  PASS  >  INAPPLICABLE
 

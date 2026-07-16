@@ -10,6 +10,10 @@ numeric / dimensional) and return None. But an ML- or RLVR-based checker
 must be able to threshold a confidence. Baking the field in now means adding
 that checker doesn't force every `Verifier` to change signature.
 
+Why the contracts are HERE and not in a `verify/contracts.py` the RFC asked for:
+[[ADR-001]] (`docs/Decisions/`). Short version: P1 locked them here first, and
+two `Verdict` types in one package is the failure the contracts exist to prevent.
+
 A.0 widening, all additive (the P1 shape and field names are unchanged, so the
 P1 contract test still passes byte-for-byte):
   - `Outcome.TIMEOUT` — a checker that ran out of time knows nothing; it is not

@@ -27,10 +27,11 @@ Mastery sets the default mode per topic: guided-on for weak topics, fast-on for 
 A student has PDFs, notebooks, lecture videos, mocks, mistakes, calendar. The model should see the **corpus**, like NotebookLM but over the student's *evolving work*, not just uploads. This is the link to [[Lecture-Companion-Overlay]].
 
 ## Open / contested
-- `#decision/open` BKT vs IRT vs a simple Elo-style rating for v1 mastery? (Start simplest that's honest; upgrade when data justifies.)
+- ~~`#decision/open` BKT vs IRT vs a simple Elo-style rating for v1 mastery?~~ **RESOLVED 2026-07-16 → Elo** ([[ADR-007]]). Design in [[Adaptive-Loop-Architecture]] §3.3; ships in B.1 behind a `StateEstimator` Protocol. Learned estimators are gated on ≥100k attempts and must beat Elo out-of-sample or they don't ship.
 - `#decision/open` What's the minimum "active state" we ship in Phase 2 vs. the full graph?
 
 ## Connections
+- Realized by → [[Adaptive-Loop-Architecture]] (the loop, the schema, phases A–D)
 - Fed by → [[Verification-Engine]] (step-errors)
 - Drives → [[Fast-vs-Guided-Toggle]], [[Durable-Moat]] (flywheel)
 - Answers → [[Human-vs-AI-Tutor-Gap]] gaps 1/2/4 · Hub → [[Startup-MOC]]
