@@ -57,6 +57,7 @@ Never delete an ADR — a reversed decision is the most useful kind.
 | [009](ADR-009-units-are-string-compare-until-pint.md) | A.0 unit checking is a string compare; pint lands at P5.0 | accepted (temporary) |
 | [010](ADR-010-pydantic-in-adaptive-dataclasses-in-verify.md) | pydantic in the adaptive plane, dataclasses in the verify plane | accepted |
 | [011](ADR-011-migrations-are-immutable.md) | Migrations are immutable numbered files; `schema.sql` is not the source of truth | accepted (live reconciliation owed) |
+| [012](ADR-012-content-and-derived-state-are-separate-tables.md) | Authored content and derived state never share a table | accepted |
 
 ## Connections
 - Decisions from → [[Adaptive-Loop-Architecture]] · [[Opus-Execution-Plan]]

@@ -1,7 +1,7 @@
 ---
 tags: [type/architecture, domain/startup, startup/architecture, decision/anchor]
 updated: 2026-07-16
-status: ACTIVE — A.0 shipped 2026-07-16 (PR #8); next step is A.1 (migrations)
+status: ACTIVE — A.0 + A.1 shipped 2026-07-16; next step is A.2 (seed one chapter)
 ---
 # 🔁 Adaptive Loop — research, architecture, roadmap
 
@@ -244,13 +244,27 @@ selection, mastery updates, review scheduling — is SQL. Concretely: *solved
 correctly → update mastery → choose next item → done*, with no LLM call; and
 *concept forgotten → decay mastery → schedule review → done*, likewise.
 
-### 3.2 Data model (additive migrations)
+### 3.2 Data model (additive migrations) — ✅ **SHIPPED as A.1**
 
-> **Delivery, per [[ADR-011]]:** these land as **one immutable, timestamped file
-> in `supabase/migrations/`** (A.1) — *not* appended to `backend/schema.sql`,
-> which is now a pointer. The `if not exists` guards below are stylistic
-> leftovers from the old file and should be **dropped** when A.1 writes the real
-> migration: a guard that silently no-ops is how drift hides.
+> **The sketch below is superseded by the migration that implemented it:**
+> `supabase/migrations/20260716160000_adaptive_kc_items_attempts.sql`. **Read the
+> migration, not this section** — it is the source of truth ([[ADR-011]]), it is
+> commented, and it differs from this sketch in three ways that implementing it
+> revealed:
+>
+> 1. **`item_state` is a new table**; `items.difficulty` is gone ([[ADR-012]]).
+>    Content and derived state cannot share a table — A.3's re-ingest would
+>    clobber learned difficulty, and `rebuild()` would write to content.
+> 2. **`student_kc_state` gained `p_correct`, `confidence`, `estimator`**, which
+>    this sketch omitted. Without a stored `p_correct` the policy would have to
+>    recompute it from `rating` using Elo's formula in SQL — hard-coding the
+>    estimator into the policy, which is the exact coupling [[ADR-005]] exists to
+>    forbid. The omission would have quietly made the Phase C swap a rewrite.
+> 3. **No `if not exists`**, and real CHECK constraints (depth 1–3, no self-loop
+>    edges, closed `error_class` vocabulary, `correct <= attempts`).
+>
+> Kept below as the design rationale — the *why* of each table. For the *what*,
+> read the migration.
 
 ```sql
 -- Migration (A.1): knowledge graph. IDs are human-readable paths so content
@@ -512,6 +526,25 @@ it doesn't, no model fixes it (the Khanmigo lesson: engagement > cleverness).
 still-missing feedback UI (same screen, two birds). Phase C is a research
 lane either account can own.
 
+### 4.1 Engineering metrics (instrument alongside the product KPIs)
+
+Product KPIs (D7/D30, feedback ratio, cost/solve) tell us whether the *thesis*
+works. These tell us whether the *infrastructure* does — and they're readable
+long before Student-JEPA is on the table. Each is a query, not a project; land
+each with the phase that makes it measurable.
+
+| Metric | Why it matters | Watch for | From |
+|---|---|---|---|
+| `rebuild()` wall time per student | [[ADR-006]] is only true while replay is cheap. This is the health of the whole event-sourced design. | Superlinear growth in attempts ⇒ the Phase C backfill won't finish | B.1 |
+| `/v1/next` p50/p95 | The ₹0 pitch is "an adaptive decision is one SQL query". If this drifts toward LLM latency, the pitch is dead. | p95 > ~100ms ⇒ the frontier query needs an index, not a cache | B.2 |
+| Event-log growth per active student/day | Sizing, and the 18-month DPDP retention job's real cost | Rows/student/day × retention ⇒ when free-tier Postgres runs out | B.2 |
+| Attempts per KC to reach mastery | The KC graph's granularity, measured instead of argued | Consistently 1–2 ⇒ KCs are too coarse; >15 ⇒ too fine, or the items are bad | B.2 |
+| Calibration error (ECE) of `p_correct` | [[ADR-005]] says `p_correct` is the portable unit — an uncalibrated one is a lie the policy acts on | Drift ⇒ the p≈0.7 target isn't hitting 0.7. Also the Phase C baseline to beat | B.1 |
+| Item-state coverage (% items with ≥N attempts) | Unrated items make the policy guess ([[ADR-012]]) | Long tail unrated ⇒ the policy needs a `probe` reason, which is why it's in the enum | B.2 |
+
+`p_correct_expected` is recorded on every `StateDelta`/`NextDecision` precisely so
+the last two are computable after the fact, without re-running the old model.
+
 ## 5. Competitive positioning (why this square is open)
 
 | Player | Has | Lacks |
@@ -638,7 +671,7 @@ prove the dispatch against — a Protocol with no implementor is a guess.
 | PR | Contents | Gate |
 |---|---|---|
 | **A.0** | contracts + registry + gold checker (above) | none — start now |
-| **A.1** | migrations A.1–A.4 as **one immutable file** in `supabase/migrations/` ([[ADR-011]] — *not* appended to `schema.sql`, which is now a pointer) + a `docs/Build/` KC-tagging guide; RLS mirroring `sessions`; verified with a local `supabase db reset` | A.0 merged **+ the live-ledger reconciliation in `supabase/README.md`** (infra account; `db push` is unsafe until then) |
+| **A.1** ✅ | **SHIPPED** — `20260716160000_adaptive_kc_items_attempts.sql`: 6 tables (`knowledge_components`, `kc_edges`, `items`, `attempts`, `student_kc_state`, `item_state`), RLS, CHECKs, indexes; + `test_migration_hygiene.py` enforcing [[ADR-011]]. **Not yet executed against any database** — needs a `supabase db reset` / fresh-DB apply. KC-tagging guide moves to A.2 (it's a content doc, not a migration). | A.0 ✔ |
 | **A.2** | KC graph seed for ONE chapter (~50 KCs + prereq edges) as a reviewable YAML/CSV → ingest CLI (`app/ingest/` already exists) | A.1 |
 | **A.3** | item-bank ingest: `items` rows w/ `answer_gold`; **tag the P3 golden problems with `kc_id`** (curate once, use twice) | A.2 + item sourcing owner assigned |
 | **B.1** | `EloEstimator` implementing `StateEstimator`; `rebuild()` replay from `attempts`; unit tests vs a hand-computed Elo trace | A.1 |
