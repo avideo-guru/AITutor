@@ -73,6 +73,16 @@ updated: 2026-07-16
   Protocols) · `app/verify/registry.py` (dispatch + aggregation) ·
   `app/verify/checkers/gold.py` (first real checker) · widened
   `app/verify/base.py`.
+- **🆕 ADRs now exist — `docs/Decisions/` (ADR-001…010), also in PR #8.** Tiny
+  records (Decision / Context / Reason / Consequences, ~35 lines) of the calls
+  that look weird without their reason. **Both sides: read the ADR before
+  "fixing" something odd, and add one when you make a call a future reader would
+  question.** The module docstrings point at the relevant record, so you'll hit
+  them from the code. Index + when-not-to-write-one → `docs/Decisions/README.md`.
+  The two corrections below are ADR-001 and ADR-002.
+- **Also resolved:** [[Student-Model]]'s `#decision/open` BKT-vs-IRT-vs-Elo —
+  **struck through, resolved to Elo** (ADR-007). It had been open since
+  2026-06-28.
 - **🔴 Backend account — two corrections that change what you'd have written:**
   1. **`verify/base.py` was widened in place; there is NO `verify/contracts.py`**
      (the doc's §7 originally said to create one). P1 had already locked
