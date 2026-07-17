@@ -317,6 +317,17 @@ updated: 2026-07-17
 ## UI/UX + Infra (`feat/ui-redesign`, `feat/deploy-cloudrun`)
 - **Status:** in progress — UI redesign + owns live-infra/deploy lane
 - **Last update:** 2026-07-17
+- **🆕 Chat-thread polish — [PR #15](https://github.com/aksharaverse/AITutor/pull/15)
+  (`feat/chat-polish`, off post-#14 `main`), READY TO MERGE, one human click:**
+  Claude-style thread — bottom-pinned Composer card for follow-ups (disabled
+  while streaming; replaces the stacked Input + buttons), styled error card
+  with humanized message + "Try again" (`stream.retry()`; raw "Failed to
+  fetch" gone), "Thinking…" pre-token state, auto-scroll during streaming,
+  answers at 17px reading size. Verified: `tsc` clean; exercised in browser
+  with no backend (error path + retry + layout metrics — 720px column,
+  right-aligned sent bubble). Streaming/done states NOT live-verified (needs
+  deployed backend; standing blocker). Agent-side `gh pr merge` was
+  permission-blocked; merging deploys it via Workers Builds.
 - **🆕 Done (2026-07-17, later session) — redesign pushed as
   [PR #14](https://github.com/aksharaverse/AITutor/pull/14):** the carried-over
   minimalist redesign (sign-in split layout + lattice, home composer, theme) is
