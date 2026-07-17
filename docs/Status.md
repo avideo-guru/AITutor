@@ -225,8 +225,46 @@ updated: 2026-07-16
      like bad Python**, against files (no DB), so it runs in CI
   3. ✅ importer `app/ingest/items.py` — transactional, idempotent, `--check`
      needs no DB
-  4. ⬜ **curate ~300 items — STILL NO OWNER**
+  4. **split in two (review 2026-07-17) so the process ships apart from the data:**
+     - **A.3a ✅ content operations — [PR #12](https://github.com/aksharaverse/AITutor/pull/12)**
+       (stacked on #11). [[Content-Authoring]] = the one page a contributor reads:
+       setup, the edit/--check loop, KC-tagging rules, gold conventions, the
+       review checklist, batch workflow. **Its examples are executed by tests**,
+       so it cannot rot into a lie. Deliverable: someone who has never seen this
+       repo adds ten valid items.
+     - **A.3b ⬜ first corpus — ~300 items. STILL NO OWNER.** Everything it needs
+       now exists.
   5. ⬜ *then* B.1 (Elo), against a clean corpus instead of manual cleanup
+- **🆕 Curation dashboard — `--check` now reports the numbers that inform, not
+  the one that flatters.** Current honest state:
+  `Items: 8 · KC coverage: 5/57 (8.8%) · Median items/KC: 0 · below floor: 57`.
+  A raw item count hides everything: 300 items over 10 KCs is a question bank,
+  and only the **median** makes that visible. **Breadth before depth** is now
+  machine-checked (`LADDER_FLOOR=5`): the report flags any KC that got a 6th item
+  while others sit below the floor, and lists the emptiest KCs to work next (ties
+  broken by id, so two curators don't pick the same one). Reported, never
+  enforced — coverage is curation status, not a broken file.
+- **📌 Correction both sides should note: "the engine is done" was overstated.**
+  Phase A finished the **static** infrastructure (contracts, persistence, domain
+  model, content pipeline). The **dynamic** half is entirely unexercised — Elo
+  updates, `rebuild()` replay, the policy, `/v1/next`, event generation — and
+  each will surface another round of refinements, exactly as A.1/A.2/A.3 each
+  did (the `p_correct` column, the chapter-string contract, the cp1252 crash,
+  `slug` vs `content_hash` — none visible on paper). B.1 is where we find out.
+- **📌 The risk has moved from architectural to operational.** Ranked:
+  (1) **content throughput** — can we sustainably produce tagged items? (A.3a is
+  the answer: process, not dataset); (2) **content quality** — a confidently
+  wrong gold is the worst bug in the system: the student is right, is marked
+  wrong, and Elo learns the opposite of the truth from every later attempt. No
+  linter catches it — only human review ([[Content-Authoring]] §8);
+  (3) **telemetry quality** — unlogged is unrecoverable, so this is the one that
+  can't be fixed retroactively. Architecture is no longer the bottleneck.
+- **New bar for engineering:** an abstraction earns its place only by solving a
+  problem hit during Elo, policy execution, or curation — not by anticipated
+  complexity. (Already applied: `KCId`/`ItemSlug`/`StudentId` domain types were
+  proposed and **declined** — `ChapterId` earned it because two writers joined by
+  exact string equality with no FK had already drifted; `kc_id` has an FK and
+  `slug` has a unique constraint + a linter. No forcing function, no type.)
 - **🔴 `chapter` is now a validated type, not free text — `app/ids.py::ChapterId`,
   grammar `SUBJECT::chapter_slug::grade`.** `app/ingest/cli.py --chapter` was
   free text with only a help string: two write boundaries producing an identifier
