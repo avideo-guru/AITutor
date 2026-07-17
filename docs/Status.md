@@ -326,18 +326,26 @@ updated: 2026-07-17
   #13 first and #14's diff shrinks to UI-only.** Verified: `tsc` clean · Expo
   web renders sign-in with zero console errors · production
   `expo export --platform web` builds `frontend/dist/` (1.71 MB bundle).
-- **🔴 Frontend live-deploy attempted, BLOCKED on auth (2026-07-17):**
-  `wrangler` on this machine has no Cloudflare login/API token (`wrangler
-  whoami` → not authenticated; `wrangler login` is an interactive browser
-  OAuth only a human can complete). Netlify (via MCP) was tried as a fallback
-  but project creation was permission-blocked, and the one existing Netlify
-  site (`avideoguru` → aksharaverse.com) must not be overwritten. **To go
-  live:** run `npx wrangler login` once in `frontend/`, then
-  `npx expo export --platform web && npx wrangler deploy` — `wrangler.jsonc`
-  is already correct (static assets from `dist/`, SPA fallback). Also set
-  `EXPO_PUBLIC_API_URL` in `frontend/.env` to the real backend URL before the
-  public build (currently `localhost:8080`; backend deploy itself is still
-  blocked on gcloud auth, same class of blocker).
+- **🟢 CORRECTION (2026-07-17, later): the frontend is ALREADY LIVE and
+  auto-deploys.** The earlier "blocked on wrangler auth" note was wrong: the
+  GitHub repo has a **Cloudflare Workers Builds git integration** (Worker
+  `aksharaverse`, account `ec86e1e5…`) that builds and deploys **every push to
+  `main`** — aksharaverse.com serves the AITutor app right now (verified in
+  browser: old sign-in design, from `main`). No local wrangler login needed for
+  routine deploys; the dashboard is only needed to read build logs / change
+  build config. Deploy = merge to `main`.
+  - `feat/ui-redesign` tip `0301518` failed its Workers build once —
+    **transient**: same tree builds locally, and the retrigger (empty commit
+    `0ae7165`) is **green**. PR #14 is mergeable with checks passing.
+  - **The one remaining step to put the redesign live: merge
+    [PR #14](https://github.com/aksharaverse/AITutor/pull/14)** (agent-side
+    `gh pr merge` was permission-blocked; needs a human click).
+  - Still true: `EXPO_PUBLIC_API_URL` is `localhost:8080` at build time, so
+    the live site's chat can't reach a backend until Cloud Run is deployed
+    (gcloud auth blocker) and the env var is set in the Workers build config.
+  - Netlify note: the `avideoguru` Netlify site claims `aksharaverse.com` as
+    its primary URL, but DNS actually resolves to the Cloudflare Worker —
+    worth cleaning up in the Netlify dashboard someday to avoid confusion.
 - **🆕 Done (2026-07-17) — parity gaps CLOSED in
   [PR #13](https://github.com/aksharaverse/AITutor/pull/13) (`fix/frontend-backend-parity`,
   off `main`, ready for review):** all three findings from the 2026-07-12
