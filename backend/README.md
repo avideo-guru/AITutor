@@ -5,8 +5,22 @@ Supabase Postgres + pgvector, DeepSeek/Gemini behind a single adapter file.
 
 ## Setup
 
-1. Create a Supabase project. Run `schema.sql` in the SQL editor. Create a
-   **public storage bucket** named `question-images`.
+1. Create a Supabase project, then apply the schema with the Supabase CLI —
+   **not** by pasting `schema.sql` into the SQL editor. That file is no longer
+   the source of truth; the immutable migrations in `supabase/migrations/` are
+   (why → `docs/Decisions/ADR-011-migrations-are-immutable.md`).
+
+   ```sh
+   supabase link --project-ref <ref>
+   supabase db push
+   ```
+
+   ⚠️ If the project **already has tables** (the live one does), read
+   `supabase/README.md` § "Reconciling the live project" *before* pushing — the
+   live migration ledger and this repo do not yet agree.
+
+   Then create a **public storage bucket** named `question-images` (buckets
+   aren't DDL, so this stays a manual step).
 2. `cp .env.example .env` and fill in the values (Supabase → Settings →
    Database for `DATABASE_URL`, Settings → API for `SUPABASE_URL`).
 3. Install & run:

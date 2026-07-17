@@ -1,0 +1,275 @@
+# Knowledge-component graph — Physics / Mechanics (JEE).
+#
+# This file is CONTENT, reviewed by humans in a diff. The ingest tool generates
+# the SQL; nobody writes INSERTs by hand.
+#
+#   python -m app.ingest.kc ../content/kc/phy_mechanics.yaml --check   # validate only
+#   python -m app.ingest.kc ../content/kc/phy_mechanics.yaml           # validate + upsert
+#   python -m app.ingest.kc ../content/kc/phy_mechanics.yaml --dot kc.dot
+#
+# Rules the ingest enforces (it aborts, it never partially writes):
+#   no self-loops · no duplicate edges · acyclic · every prereq exists ·
+#   no isolated nodes unless `root: true` · deterministic topological order.
+#
+# Granularity: ~55 topic-level KCs for the whole of Mechanics. This is
+# deliberately COARSE and deliberately not a target number. Do NOT split a KC
+# because someone else has 30k of them — split it when telemetry says so
+# (attempts-per-KC-to-mastery consistently ~15+ while its neighbours sit at ~3
+# means it hides two skills). Ontology follows data. See ADR-013.
+#
+# ⚠️ `chapter` MUST be byte-identical to the `chunks.chapter` string used when
+# the mechanics notes are RAG-ingested — retrieval filters on exact equality
+# (`where chapter = $2`), so a mismatch means "explain this" silently retrieves
+# nothing. The trailing number follows the existing `PHY::optics::12`
+# convention (inferred = NCERT class). Whoever ingests mechanics notes must use
+# this exact string:  python -m app.ingest.cli notes/mechanics.md \
+#                       --subject PHY --chapter PHY::mechanics::11
+
+subject: PHY
+chapter: PHY::mechanics::11
+
+knowledge_components:
+
+  # --- foundations -----------------------------------------------------------
+  - id: phy.mech.units_dimensions
+    name: Units and dimensional analysis
+
+  - id: phy.mech.vectors_basics
+    name: Vectors, components and unit vectors
+
+  - id: phy.mech.vectors_addition
+    name: Vector addition and subtraction
+    prereqs: [phy.mech.vectors_basics]
+
+  - id: phy.mech.vectors_dot
+    name: Scalar (dot) product
+    prereqs: [phy.mech.vectors_addition]
+
+  - id: phy.mech.vectors_cross
+    name: Vector (cross) product
+    prereqs: [phy.mech.vectors_addition]
+
+  # --- kinematics ------------------------------------------------------------
+  - id: phy.mech.kinematics_basics
+    name: Distance, displacement, speed and velocity
+    prereqs: [phy.mech.vectors_basics]
+
+  - id: phy.mech.kinematics_acceleration
+    name: Acceleration
+    prereqs: [phy.mech.kinematics_basics]
+
+  - id: phy.mech.kinematics_graphs
+    name: Motion graphs (x-t, v-t, a-t)
+    prereqs: [phy.mech.kinematics_acceleration]
+
+  - id: phy.mech.kinematics_equations
+    name: Equations of uniformly accelerated motion
+    prereqs: [phy.mech.kinematics_acceleration, phy.mech.units_dimensions]
+
+  - id: phy.mech.kinematics_calculus
+    name: Kinematics by differentiation and integration
+    prereqs: [phy.mech.kinematics_equations]
+
+  - id: phy.mech.free_fall
+    name: Free fall under gravity
+    prereqs: [phy.mech.kinematics_equations]
+
+  - id: phy.mech.relative_motion_1d
+    name: Relative motion in one dimension
+    prereqs: [phy.mech.kinematics_basics]
+
+  - id: phy.mech.relative_motion_2d
+    name: Relative motion in two dimensions (river-boat, rain-man)
+    prereqs: [phy.mech.relative_motion_1d, phy.mech.vectors_addition]
+
+  - id: phy.mech.projectile_ground
+    name: Projectile motion from ground level
+    prereqs:
+      - phy.mech.kinematics_equations
+      - phy.mech.vectors_addition
+      - phy.mech.free_fall
+
+  - id: phy.mech.projectile_height
+    name: Horizontal projection and projectiles from a height
+    prereqs: [phy.mech.projectile_ground]
+
+  - id: phy.mech.projectile_incline
+    name: Projectile motion on an inclined plane
+    prereqs: [phy.mech.projectile_ground]
+
+  # --- Newton's laws ---------------------------------------------------------
+  - id: phy.mech.newton_first
+    name: Newton's first law and inertia
+
+  - id: phy.mech.newton_second
+    name: Newton's second law
+    prereqs: [phy.mech.newton_first, phy.mech.kinematics_acceleration]
+
+  - id: phy.mech.newton_third
+    name: Newton's third law
+    prereqs: [phy.mech.newton_second]
+
+  - id: phy.mech.free_body_diagrams
+    name: Free-body diagrams
+    prereqs: [phy.mech.newton_second, phy.mech.vectors_addition]
+
+  - id: phy.mech.normal_tension
+    name: Normal force and tension
+    prereqs: [phy.mech.free_body_diagrams, phy.mech.newton_third]
+
+  - id: phy.mech.pulleys
+    name: Pulley systems
+    prereqs: [phy.mech.normal_tension]
+
+  - id: phy.mech.constraint_motion
+    name: String and wedge constraint relations
+    prereqs: [phy.mech.pulleys]
+
+  - id: phy.mech.spring_force
+    name: Spring force and Hooke's law
+    prereqs: [phy.mech.free_body_diagrams]
+
+  - id: phy.mech.friction_static
+    name: Static friction and limiting friction
+    prereqs: [phy.mech.normal_tension]
+
+  - id: phy.mech.friction_kinetic
+    name: Kinetic friction
+    prereqs: [phy.mech.friction_static]
+
+  - id: phy.mech.inclined_plane
+    name: Motion on an inclined plane
+    prereqs: [phy.mech.free_body_diagrams, phy.mech.friction_kinetic]
+
+  - id: phy.mech.pseudo_force
+    name: Non-inertial frames and pseudo forces
+    prereqs: [phy.mech.newton_second, phy.mech.free_body_diagrams]
+
+  # --- circular motion -------------------------------------------------------
+  - id: phy.mech.circular_kinematics
+    name: Angular displacement, velocity and acceleration
+    prereqs: [phy.mech.kinematics_acceleration]
+
+  - id: phy.mech.centripetal
+    name: Centripetal acceleration and force
+    prereqs: [phy.mech.circular_kinematics, phy.mech.newton_second]
+
+  - id: phy.mech.banking
+    name: Banking of roads
+    prereqs: [phy.mech.centripetal, phy.mech.friction_static, phy.mech.inclined_plane]
+
+  - id: phy.mech.vertical_circle
+    name: Vertical circular motion
+    prereqs: [phy.mech.centripetal, phy.mech.energy_conservation]
+
+  # --- work, energy, power ---------------------------------------------------
+  - id: phy.mech.work_constant_force
+    name: Work done by a constant force
+    prereqs: [phy.mech.vectors_dot]
+
+  - id: phy.mech.work_variable_force
+    name: Work done by a variable force
+    prereqs: [phy.mech.work_constant_force, phy.mech.kinematics_calculus]
+
+  - id: phy.mech.kinetic_energy
+    name: Kinetic energy and the work-energy theorem
+    prereqs: [phy.mech.work_constant_force, phy.mech.newton_second]
+
+  - id: phy.mech.potential_energy_gravity
+    name: Gravitational potential energy (uniform field)
+    prereqs: [phy.mech.work_constant_force]
+
+  - id: phy.mech.potential_energy_spring
+    name: Elastic potential energy
+    prereqs: [phy.mech.spring_force, phy.mech.work_variable_force]
+
+  - id: phy.mech.conservative_forces
+    name: Conservative and non-conservative forces
+    prereqs: [phy.mech.potential_energy_gravity]
+
+  - id: phy.mech.energy_conservation
+    name: Conservation of mechanical energy
+    prereqs:
+      - phy.mech.kinetic_energy
+      - phy.mech.potential_energy_gravity
+      - phy.mech.conservative_forces
+
+  - id: phy.mech.power
+    name: Power
+    prereqs: [phy.mech.work_constant_force]
+
+  # --- momentum and collisions ----------------------------------------------
+  - id: phy.mech.momentum
+    name: Linear momentum and impulse
+    prereqs: [phy.mech.newton_second]
+
+  - id: phy.mech.momentum_conservation
+    name: Conservation of linear momentum
+    prereqs: [phy.mech.momentum, phy.mech.newton_third]
+
+  - id: phy.mech.collisions_elastic
+    name: Elastic collisions in one dimension
+    prereqs: [phy.mech.momentum_conservation, phy.mech.energy_conservation]
+
+  - id: phy.mech.collisions_inelastic
+    name: Inelastic collisions and coefficient of restitution
+    prereqs: [phy.mech.momentum_conservation, phy.mech.kinetic_energy]
+
+  - id: phy.mech.collisions_2d
+    name: Collisions in two dimensions
+    prereqs: [phy.mech.collisions_elastic, phy.mech.vectors_addition]
+
+  - id: phy.mech.center_of_mass
+    name: Centre of mass
+    prereqs: [phy.mech.vectors_addition]
+
+  - id: phy.mech.com_motion
+    name: Motion of the centre of mass
+    prereqs: [phy.mech.center_of_mass, phy.mech.momentum_conservation]
+
+  - id: phy.mech.variable_mass
+    name: Variable-mass systems and the rocket equation
+    prereqs: [phy.mech.momentum_conservation, phy.mech.kinematics_calculus]
+
+  # --- rotational motion -----------------------------------------------------
+  - id: phy.mech.torque
+    name: Torque
+    prereqs: [phy.mech.vectors_cross, phy.mech.free_body_diagrams]
+
+  - id: phy.mech.moment_of_inertia
+    name: Moment of inertia
+    prereqs: [phy.mech.center_of_mass]
+
+  - id: phy.mech.axis_theorems
+    name: Parallel and perpendicular axis theorems
+    prereqs: [phy.mech.moment_of_inertia]
+
+  - id: phy.mech.rotational_kinematics
+    name: Rotational kinematics
+    prereqs: [phy.mech.circular_kinematics]
+
+  - id: phy.mech.rotational_dynamics
+    name: Rotational dynamics (tau = I alpha)
+    prereqs:
+      - phy.mech.torque
+      - phy.mech.moment_of_inertia
+      - phy.mech.rotational_kinematics
+
+  - id: phy.mech.angular_momentum
+    name: Angular momentum
+    prereqs: [phy.mech.vectors_cross, phy.mech.momentum]
+
+  - id: phy.mech.angular_momentum_conservation
+    name: Conservation of angular momentum
+    prereqs: [phy.mech.angular_momentum, phy.mech.torque]
+
+  - id: phy.mech.rotational_energy
+    name: Rotational kinetic energy
+    prereqs: [phy.mech.rotational_dynamics, phy.mech.kinetic_energy]
+
+  - id: phy.mech.rolling
+    name: Rolling motion without slipping
+    prereqs:
+      - phy.mech.rotational_dynamics
+      - phy.mech.energy_conservation
+      - phy.mech.friction_static

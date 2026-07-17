@@ -5,4 +5,5 @@ httpx==0.28.1
 PyJWT==2.10.1
 stripe==12.0.1
 pydantic-settings==2.9.1
+PyYAML==6.0.3          # app/ingest/kc_graph.py — KC specs are YAML (reviewable in a diff)
 sentry-sdk[fastapi]==2.29.1
