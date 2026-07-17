@@ -337,9 +337,12 @@ updated: 2026-07-17
   - `feat/ui-redesign` tip `0301518` failed its Workers build once —
     **transient**: same tree builds locally, and the retrigger (empty commit
     `0ae7165`) is **green**. PR #14 is mergeable with checks passing.
-  - **The one remaining step to put the redesign live: merge
-    [PR #14](https://github.com/aksharaverse/AITutor/pull/14)** (agent-side
-    `gh pr merge` was permission-blocked; needs a human click).
+  - **✅ DONE — PR #14 MERGED (`b6ca28a`, 2026-07-17) and DEPLOYED.** Workers
+    build for the merge commit: success. **aksharaverse.com now serves the
+    redesign** (verified in browser post-deploy: new split sign-in with
+    lattice, zero console errors). PR #13's frontend commits shipped with it;
+    the `GET /v1/sessions/{id}` backend route from #13 is also on `main` now —
+    backend lane: PR #13 itself can be closed or merged as a no-op check.
   - Still true: `EXPO_PUBLIC_API_URL` is `localhost:8080` at build time, so
     the live site's chat can't reach a backend until Cloud Run is deployed
     (gcloud auth blocker) and the env var is set in the Workers build config.
