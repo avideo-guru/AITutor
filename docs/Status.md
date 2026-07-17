@@ -317,6 +317,27 @@ updated: 2026-07-17
 ## UI/UX + Infra (`feat/ui-redesign`, `feat/deploy-cloudrun`)
 - **Status:** in progress — UI redesign + owns live-infra/deploy lane
 - **Last update:** 2026-07-17
+- **🆕 Done (2026-07-17, later session) — redesign pushed as
+  [PR #14](https://github.com/aksharaverse/AITutor/pull/14):** the carried-over
+  minimalist redesign (sign-in split layout + lattice, home composer, theme) is
+  committed, merged with `main` AND with `origin/fix/frontend-backend-parity`
+  (PR #13 — so the branch has the real chat thread: follow-ups, feedback,
+  session lookup). **Note: PR #14 therefore contains PR #13's commits — merge
+  #13 first and #14's diff shrinks to UI-only.** Verified: `tsc` clean · Expo
+  web renders sign-in with zero console errors · production
+  `expo export --platform web` builds `frontend/dist/` (1.71 MB bundle).
+- **🔴 Frontend live-deploy attempted, BLOCKED on auth (2026-07-17):**
+  `wrangler` on this machine has no Cloudflare login/API token (`wrangler
+  whoami` → not authenticated; `wrangler login` is an interactive browser
+  OAuth only a human can complete). Netlify (via MCP) was tried as a fallback
+  but project creation was permission-blocked, and the one existing Netlify
+  site (`avideoguru` → aksharaverse.com) must not be overwritten. **To go
+  live:** run `npx wrangler login` once in `frontend/`, then
+  `npx expo export --platform web && npx wrangler deploy` — `wrangler.jsonc`
+  is already correct (static assets from `dist/`, SPA fallback). Also set
+  `EXPO_PUBLIC_API_URL` in `frontend/.env` to the real backend URL before the
+  public build (currently `localhost:8080`; backend deploy itself is still
+  blocked on gcloud auth, same class of blocker).
 - **🆕 Done (2026-07-17) — parity gaps CLOSED in
   [PR #13](https://github.com/aksharaverse/AITutor/pull/13) (`fix/frontend-backend-parity`,
   off `main`, ready for review):** all three findings from the 2026-07-12
