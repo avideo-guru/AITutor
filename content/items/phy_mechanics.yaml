@@ -1,0 +1,135 @@
+# Item bank — Physics / Mechanics (JEE).
+#
+#   python -m app.ingest.items ../content/items/phy_mechanics.yaml \
+#       --kc ../content/kc/phy_mechanics.yaml --check
+#
+# ⚠️ THIS IS A FORMAT SEED, NOT THE BANK. 8 items across 5 KCs — enough to
+# exercise the linter and the importer, nowhere near enough to adapt over.
+# A.3 step 4 (curation, ~300 items) is a human job and has no owner yet.
+#
+# Target when curating: ~5-6 items per KC across a difficulty spread, because an
+# adaptive policy selects *within* a KC — a KC with one item can only be served,
+# never adapted over. 57 KCs x ~5-6 ≈ 300. Do not chase 5,000 before D7 is
+# measured.
+#
+# Rules the linter enforces (all fatal, all before the database):
+#   - `kc` must exist in the KC graph, and be exactly one KC
+#   - `answer` must be gradeable by GoldAnswerChecker — it is checked against
+#     ITSELF at lint time. If the verifier can't grade the correct answer, it
+#     can't grade a student's either (ADR-016).
+#   - no duplicate stems within a KC (the loop would double-count the evidence)
+#   - `source` is required — attribution for NCERT/JEE material is a licensing
+#     obligation
+#   - NO `difficulty` key: Elo learns it from attempts (ADR-012)
+#
+# `slug` is authored identity and is never reused (ADR-015). Convention:
+# <kc_id>.qNNN. Fixing a typo in a stem keeps the slug, so the item keeps its
+# attempts.
+#
+# Source note: every item below is written for this repo to exercise the
+# pipeline. Real curation should carry a real citation (NCERT Exemplar Q4.12,
+# JEE Main 2023 S1 Q12, ...) — `source` is what makes that auditable.
+
+subject: PHY
+chapter: PHY::mechanics::11
+
+items:
+
+  - slug: phy.mech.projectile_ground.q001
+    kc: phy.mech.projectile_ground
+    stem: |
+      A ball is projected from level ground with speed $u = 20\ \mathrm{m/s}$ at
+      $30^\circ$ above the horizontal. Taking $g = 10\ \mathrm{m/s^2}$, find its
+      total time of flight.
+    answer:
+      value: 2.0
+      unit: s
+    hints:
+      - Time of flight depends only on the vertical component of velocity.
+      - $u_y = u\sin\theta$, and the ball returns to the same height.
+      - $T = 2u\sin\theta / g$.
+    source: Written for AITutor pipeline seed (A.3)
+
+  - slug: phy.mech.projectile_ground.q002
+    kc: phy.mech.projectile_ground
+    stem: |
+      A projectile launched from level ground at $45^\circ$ has a range of
+      $80\ \mathrm{m}$. Taking $g = 10\ \mathrm{m/s^2}$, find its launch speed.
+    answer:
+      value: 28.28
+      unit: m/s
+    hints:
+      - $R = u^2 \sin 2\theta / g$.
+      - At $45^\circ$, $\sin 2\theta = 1$, so $R = u^2/g$.
+    source: Written for AITutor pipeline seed (A.3)
+
+  - slug: phy.mech.projectile_ground.q003
+    kc: phy.mech.projectile_ground
+    stem: |
+      For a projectile launched from level ground at a fixed speed, which launch
+      angle maximises the horizontal range?
+      (A) $30^\circ$  (B) $45^\circ$  (C) $60^\circ$  (D) $90^\circ$
+    answer:
+      choices: [B]
+    source: Written for AITutor pipeline seed (A.3)
+
+  - slug: phy.mech.free_fall.q001
+    kc: phy.mech.free_fall
+    stem: |
+      A stone is dropped from rest at a height of $45\ \mathrm{m}$. Taking
+      $g = 10\ \mathrm{m/s^2}$ and ignoring air resistance, find the time it
+      takes to reach the ground.
+    answer:
+      value: 3.0
+      unit: s
+    hints:
+      - Initial velocity is zero, so $h = \tfrac{1}{2} g t^2$.
+    source: Written for AITutor pipeline seed (A.3)
+
+  - slug: phy.mech.free_fall.q002
+    kc: phy.mech.free_fall
+    stem: |
+      A ball is dropped from rest. Taking $g = 10\ \mathrm{m/s^2}$, what is its
+      speed after falling for $2\ \mathrm{s}$?
+    answer:
+      value: 20.0
+      unit: m/s
+    source: Written for AITutor pipeline seed (A.3)
+
+  - slug: phy.mech.newton_second.q001
+    kc: phy.mech.newton_second
+    stem: |
+      A constant net force of $12\ \mathrm{N}$ acts on a $3\ \mathrm{kg}$ block
+      resting on a frictionless surface. Find the block's acceleration.
+    answer:
+      value: 4.0
+      unit: m/s^2
+    hints:
+      - $F_{net} = ma$.
+    source: Written for AITutor pipeline seed (A.3)
+
+  - slug: phy.mech.energy_conservation.q001
+    kc: phy.mech.energy_conservation
+    stem: |
+      A $2\ \mathrm{kg}$ block slides from rest down a frictionless incline
+      through a vertical drop of $5\ \mathrm{m}$. Taking $g = 10\ \mathrm{m/s^2}$,
+      find its speed at the bottom.
+    answer:
+      value: 10.0
+      unit: m/s
+    hints:
+      - No friction, so mechanical energy is conserved.
+      - $mgh = \tfrac{1}{2}mv^2$; the mass cancels.
+    source: Written for AITutor pipeline seed (A.3)
+
+  - slug: phy.mech.momentum_conservation.q001
+    kc: phy.mech.momentum_conservation
+    stem: |
+      Which quantities are conserved in a perfectly inelastic collision between
+      two isolated bodies?
+      (A) Linear momentum  (B) Kinetic energy  (C) Total energy  (D) Mass
+    answer:
+      choices: [A, C, D]
+    hints:
+      - Kinetic energy is lost to deformation and heat; total energy is not.
+    source: Written for AITutor pipeline seed (A.3)

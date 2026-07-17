@@ -1,7 +1,7 @@
 ---
 tags: [type/architecture, domain/startup, startup/architecture, decision/anchor]
 updated: 2026-07-16
-status: ACTIVE — A.0/A.1/A.2 shipped 2026-07-16; next step is A.3 (item bank — needs a human owner)
+status: ACTIVE — A.0–A.3(1-3) shipped; A.3 step 4 = curate ~300 items (HUMAN BLOCKER), then B.1
 ---
 # 🔁 Adaptive Loop — research, architecture, roadmap
 
@@ -673,7 +673,7 @@ prove the dispatch against — a Protocol with no implementor is a guess.
 | **A.0** | contracts + registry + gold checker (above) | none — start now |
 | **A.1** ✅ | **SHIPPED** — `20260716160000_adaptive_kc_items_attempts.sql`: 6 tables (`knowledge_components`, `kc_edges`, `items`, `attempts`, `student_kc_state`, `item_state`), RLS, CHECKs, indexes; + `test_migration_hygiene.py` enforcing [[ADR-011]]. **Not yet executed against any database** — needs a `supabase db reset` / fresh-DB apply. KC-tagging guide moves to A.2 (it's a content doc, not a migration). | A.0 ✔ |
 | **A.2** ✅ | **SHIPPED** — `content/kc/phy_mechanics.yaml` (57 KCs, 86 edges, longest chain 10, 1 component, 0 cycles) + `app/ingest/kc_graph.py` (pure: parse/validate/metrics/topo/dot) + `app/ingest/kc.py` (transactional upsert, `--check`, `--dot`). Validation is fatal and pre-write ([[ADR-014]]); granularity is telemetry-driven, not a target ([[ADR-013]]). | A.1 |
-| **A.3** | item-bank ingest: `items` rows w/ `answer_gold`; **tag the P3 golden problems with `kc_id`** (curate once, use twice) | A.2 + item sourcing owner assigned |
+| **A.3** — *reprioritised from "item sourcing" to **content pipeline***. Steps 1–3 are engineering and are **SHIPPED**; step 4 is the human blocker. <br>1. ✅ item schema (`content/items/*.yaml`) + `items.slug` migration ([[ADR-015]]) <br>2. ✅ linter (`app/ingest/item_spec.py`) — content is code; **bad content fails CI like bad Python** <br>3. ✅ importer (`app/ingest/items.py`) — transactional, idempotent, `--check` needs no DB <br>4. ⬜ **curate ~300 items — needs a human owner** <br>5. ⬜ *then* B.1 (Elo) | A.2 ✔ |
 | **B.1** | `EloEstimator` implementing `StateEstimator`; `rebuild()` replay from `attempts`; unit tests vs a hand-computed Elo trace | A.1 |
 | **B.2** | `policy.py` + `routes/practice.py` (`GET /v1/next`, `POST /v1/attempts`); logs `reason` + `policy` version | B.1 + A.3 |
 | **B.3** | UI practice screen + the still-missing feedback UI (UI lane) | B.2 |

@@ -22,15 +22,17 @@ from dataclasses import dataclass, field
 
 import yaml
 
+from app.ids import ChapterId, InvalidChapterId
+
 # Mirrors `knowledge_components.id`: a human-readable path, lowercase, dotted.
 # Reviewable in a diff — a wrong prereq should be visible to a human reader.
 ID_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$")
 
-# MUST match the `chunks.chapter` convention ('PHY::optics::12') — retrieval
-# filters on exact string equality, so a KC whose chapter doesn't match its
-# chunks retrieves nothing. This regex is the guard against that silent failure.
-CHAPTER_RE = re.compile(r"^[A-Z]+::[a-z0-9_]+::\d+$")
-SUBJECT_RE = re.compile(r"^[A-Z]+$")
+SUBJECT_RE = re.compile(r"^[A-Z]{2,6}$")
+
+# The chapter grammar lives in app.ids, not here. Two modules each holding their
+# own copy of a shared identifier's rules is how the two strings drift apart —
+# which is the exact bug this validation exists to prevent.
 
 
 class GraphError(Exception):
@@ -203,12 +205,19 @@ def validate(chapter: Chapter) -> None:
             f"subject {chapter.subject!r} must be uppercase letters (e.g. 'PHY') "
             "to match chunks.subject"
         )
-    if not CHAPTER_RE.match(chapter.chapter):
-        problems.append(
-            f"chapter {chapter.chapter!r} must look like 'PHY::mechanics::11' — it has to be "
-            "byte-identical to the chunks.chapter string, because retrieval filters on "
-            "exact equality and a mismatch silently retrieves nothing"
-        )
+    try:
+        parsed = ChapterId.parse(chapter.chapter)
+    except InvalidChapterId as e:
+        problems.append(str(e))
+    else:
+        # A KC graph that says subject: PHY but chapter: CHEM::… would write two
+        # columns that contradict each other, and filtering by either would give a
+        # different answer.
+        if parsed.subject != chapter.subject:
+            problems.append(
+                f"subject {chapter.subject!r} disagrees with the chapter's subject "
+                f"{parsed.subject!r} in {chapter.chapter!r}"
+            )
     if problems:
         raise GraphError("Ingest failed.\n\n" + "\n".join(problems))
 

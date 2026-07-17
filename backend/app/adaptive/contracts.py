@@ -38,10 +38,12 @@ No new dependency — FastAPI already brings pydantic v2.
 """
 
 from datetime import datetime
-from typing import Literal, Protocol, runtime_checkable
+from typing import Annotated, Literal, Protocol, runtime_checkable
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from app.ids import CHAPTER_PATTERN
 
 # Why a knowledge component is a str and not a UUID: IDs are human-readable
 # paths ('phy.mech.kinematics.projectile') so content tagging is reviewable in a
@@ -137,7 +139,11 @@ class NextRequest(BaseModel):
 
     user_id: UUID
     subject: str
-    chapter: str | None = None
+    # Stays a `str` because it IS one on the wire — but a validated one. The
+    # pattern is app.ids' single source of truth for the grammar, so a caller
+    # cannot invent a chapter string that no chunk and no KC will ever match
+    # (see app/ids.py on why this identifier has no FK to protect it).
+    chapter: Annotated[str, Field(pattern=CHAPTER_PATTERN)] | None = None
     # Items the student just saw; the policy must not serve them again.
     exclude_item_ids: tuple[UUID, ...] = ()
 
