@@ -10,6 +10,9 @@ moat. See [docs/Startup-MOC.md](docs/Startup-MOC.md).
   dist`, SPA fallback).
 - `backend/` — FastAPI monolith. RAG (Supabase Postgres + pgvector) →
   DeepSeek primary / Gemini vision+failover, SSE streaming, Stripe billing.
+  Deployed to **Google Cloud Run** (single container, region `asia-south1` /
+  Mumbai; scale-to-zero pre-launch, `min-instances=1` at pilot). Host-agnostic
+  — any container host works if economics change.
 - **Supabase** — auth (JWKS-verified, not shared HS256 secret — see commit
   `dd930f6`), Postgres + pgvector, file storage.
 
@@ -43,13 +46,23 @@ scoped to `docs/Status.md` **only**, never code, this file, or any
 destructive git operation.
 
 ## Deployment / auth notes
+- **Final stack:** Cloudflare (frontend static assets) · Supabase
+  (auth + Postgres/pgvector + storage) · Google Cloud Run (FastAPI backend).
+  Railway/Fly/Render were considered and dropped in favor of Cloud Run
+  (Mumbai region, scale-to-zero, SSE-friendly, generous free tier).
 - Cloudflare deploy is static-assets-only (Workers static site from
   `frontend/dist`), per `frontend/wrangler.jsonc`.
+- Cloud Run: single container from `backend/Dockerfile`, region `asia-south1`.
+  Backend streams SSE, so the host must allow long-lived responses (rules out
+  short-timeout serverless). Host-agnostic — the image runs anywhere.
 - Supabase auth: JWTs are verified via JWKS (fixed from shared HS256 secret
-  in `dd930f6`).
-- Supabase MCP (`list_projects`) returned no projects for the currently
-  connected account — if you need to inspect the live Supabase project,
-  confirm which account/org the MCP is authenticated as first.
+  in `dd930f6`). Google OAuth is brokered *through* Supabase (Google → Supabase
+  JWT → backend JWKS verify) — this is why Supabase, not Firebase: pgvector,
+  atomic-SQL quotas, traces, and Postgres FTS are all load-bearing.
+- Supabase MCP: the live project (`xdszkwjkaamyycirfslz`) is connected on the
+  **UI/laptop account**, which owns live-infra work. The backend account's MCP
+  showed 0 projects — confirm which account/org is authenticated before
+  inspecting the live DB.
 
 ## Prior implementation
 Earlier Angular + FastAPI/SQLite build preserved on

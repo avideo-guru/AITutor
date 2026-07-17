@@ -135,7 +135,7 @@ Your verifier is a **verifiable reward function**. That's exactly what frontier 
 | Retrieval | pgvector / Qdrant over problem+concept bank | Free/cheap |
 | Frontend | **WhatsApp Business API** (Gupshup/AiSensy) + **Next.js PWA** | WhatsApp = India reach, no install |
 | Payments | **Razorpay** (UPI, subscriptions) | — |
-| Infra | Railway/Render/one VM → Modal for GPU bursts | No fixed GPU cost |
+| Infra | Google Cloud Run → Modal for GPU bursts | No fixed GPU cost |
 | Credits | AWS Activate, Google/OpenAI/Anthropic for Startups, Modal | Funds 6–12 months of compute |
 
 **Cost intuition:** because standard exam problems repeat, a **solution cache** gives huge hit-rates → marginal cost approaches zero on repeats. Realistic MVP burn with credits: a few hundred $/month, mostly absorbed by credits. This is genuinely buildable on low/moderate funding.

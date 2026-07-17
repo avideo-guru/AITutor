@@ -46,7 +46,7 @@ Three deployables. One cloud region. No queues, no cross-cloud calls, no microse
                        ▼
 ┌───────────────────────────────────────────────┐
 │         backend/  one FastAPI service          │
-│   (single container on Railway/Fly/Render)   │
+│   (single container on Google Cloud Run)     │
 │   auth middleware · RAG · quotas · billing   │
 └──────┬─────────────────┬──────────────────────┘
        │                 │
@@ -126,7 +126,7 @@ A prior draft of this spec explored a tri-cloud design (Cognito + Azure Function
 | Item | 0–1k MAU | Notes |
 |---|---|---|
 | Supabase | $0–25 | free tier → Pro at scale |
-| API host (Railway/Fly) | $5–10 | one small container |
+| API host (Cloud Run) | $0–10 | scale-to-zero pre-launch; `min-instances=1` at pilot |
 | DeepSeek + embeddings | ~$3–15 | cache-hit heavy, metered per session |
 | Gemini (vision/failover) | ~$2–10 | ~5% of questions |
 | Stripe / Sentry | $0 + 2.9% | usage-based |

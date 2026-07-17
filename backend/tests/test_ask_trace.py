@@ -15,7 +15,7 @@ import app.routes.sessions as sess_mod
 from app.core.llm import Usage
 from app.errors import ApiError
 from app.routes.ask import AskRequest, ask
-from app.routes.sessions import FeedbackBody, feedback
+from app.routes.sessions import FeedbackBody, feedback, get_session
 
 
 class FakeConn:
@@ -50,6 +50,7 @@ class FakePool:
         self.log = []
         self.history_rows: list[dict] = []
         self.feedback_returns = {"id": uuid.uuid4()}
+        self.session_row = None
 
     async def fetchrow(self, sql, *args):
         if "update profiles set" in sql and "questions_today = case" in sql:
@@ -58,6 +59,9 @@ class FakePool:
         if "update sessions" in sql and "feedback_rating" in sql:
             self.log.append(("feedback_update", args))
             return self.feedback_returns
+        if "select" in sql and "from sessions" in sql and "where id = $1" in sql:
+            self.log.append(("session_get", args))
+            return self.session_row
         return None
 
     async def fetch(self, sql, *args):
@@ -299,6 +303,32 @@ def test_long_history_answer_keeps_boxed_line():
     out = pipeline._truncate_history_answer(long_answer)
     assert len(out) < 1200
     assert "\\boxed{v = 3" in out
+
+
+def test_get_session_owned_returns_row_with_string_ids():
+    pool = FakePool()
+    sid, tid = uuid.uuid4(), uuid.uuid4()
+    pool.session_row = {
+        "id": sid, "thread_id": tid, "question": "q", "image_url": None,
+        "answer": "a", "model": "m", "cost_usd": 0.0,
+        "feedback_rating": None, "created_at": datetime.now(),
+    }
+    sess_mod.get_pool = lambda: pool
+
+    out = asyncio.run(get_session(sid, profile=_profile()))
+    assert out["id"] == str(sid)
+    assert out["thread_id"] == str(tid)
+    assert "session_get" in [k for k, _ in pool.log]
+
+
+def test_get_session_foreign_or_missing_404():
+    pool = FakePool()
+    pool.session_row = None                                   # not the caller's row
+    sess_mod.get_pool = lambda: pool
+
+    with pytest.raises(ApiError) as ei:
+        asyncio.run(get_session(uuid.uuid4(), profile=_profile()))
+    assert ei.value.status == 404
 
 
 def test_feedback_owned_session_ok():

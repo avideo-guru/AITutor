@@ -63,6 +63,9 @@ webhook and `/healthz`. Errors always use
 
 ## Deploy
 
-Any container host (Railway / Fly / Render): build the Dockerfile, set the env
-vars from `.env.example`, point Stripe's webhook at
-`https://<host>/v1/billing/webhook`.
+**Google Cloud Run** (canonical host; region `asia-south1` / Mumbai for IST
+latency, scale-to-zero pre-launch, supports SSE streaming): build the
+Dockerfile, deploy the image, set the env vars from `.env.example`, point
+Stripe's webhook at `https://<host>/v1/billing/webhook`. The service is a plain
+container, so any other host (Fly / Render / a VM) also works if economics
+change.

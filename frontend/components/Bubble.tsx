@@ -1,5 +1,6 @@
-// One Q&A exchange: the question (with optional photo) and the answer with
-// live LaTeX rendering. Used by both the live thread and history threads.
+// One Q&A exchange: the question (with optional photo) as a quiet card on
+// the right — like a sent message — and the answer as plain full-width prose.
+// Used by both the live thread and history threads.
 
 import React from "react";
 import { Image, Text, View } from "react-native";
@@ -23,30 +24,36 @@ export function Bubble({
 }) {
   const t = useTheme();
   return (
-    <View style={{ gap: space.m }}>
-      <View>
-        <Text style={[font.small, { color: t.muted, marginBottom: space.xs }]}>You asked</Text>
-        <Text style={[font.bodyLg, { color: t.fg, fontWeight: "600" }]}>{question}</Text>
+    <View style={{ gap: space.l }}>
+      <View
+        style={{
+          alignSelf: "flex-end",
+          maxWidth: "85%",
+          backgroundColor: t.card,
+          borderWidth: 1,
+          borderColor: t.border,
+          borderRadius: 16,
+          borderBottomRightRadius: 4,
+          padding: space.m,
+        }}
+      >
+        <Text style={[font.body, { color: t.fg }]}>{question}</Text>
         {imageUrl ? (
           <Image
             source={{ uri: imageUrl }}
             style={{
-              width: "100%", height: 180, borderRadius: 10,
-              marginTop: space.s, resizeMode: "contain", backgroundColor: t.card,
+              width: 220,
+              height: 160,
+              borderRadius: 10,
+              marginTop: space.s,
+              resizeMode: "contain",
+              backgroundColor: t.bg,
             }}
           />
         ) : null}
       </View>
 
-      <View
-        style={{
-          backgroundColor: t.card,
-          borderWidth: 1,
-          borderColor: t.border,
-          borderRadius: 12,
-          padding: space.m,
-        }}
-      >
+      <View>
         <MathText style={{ ...font.body, color: t.fg }}>
           {answer + (streaming ? " ▍" : "")}
         </MathText>

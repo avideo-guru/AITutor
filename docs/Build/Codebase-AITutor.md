@@ -35,7 +35,7 @@ A complete, testable MVP skeleton — not a mockup, but not live either:
 ## ▶️ Concrete next steps
 - [ ] Stand up a real Supabase project, run `backend/schema.sql`, fill both `.env` files, confirm the end-to-end loop (sign up → ask → stream → history) against live DeepSeek/Gemini.
 - [ ] Ingest real Physics-Optics content via `backend/app/ingest/cli.py`; tune the similarity floor (currently 0.75) against real retrieval quality.
-- [ ] Deploy `backend/` (Railway/Fly/Render per the spec) and `frontend/` as a PWA; wire Stripe live keys.
+- [ ] Deploy `backend/` (Google Cloud Run, region `asia-south1`) and `frontend/` as a PWA; wire Stripe live keys.
 - [ ] Design and build the **verifier service boundary** (`POST /verify`) per [[Architecture-Options]] §2 and the preserved design in [[Backend-Implementation-Plan]] — this is what turns the RAG tutor into the actual moat.
 - [ ] Build the **StepCard**/verified-badge UI once the verifier exists (extends `Bubble`, doesn't replace it).
 

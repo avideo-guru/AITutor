@@ -50,6 +50,30 @@ async def list_sessions(cursor: str | None = None,
     return {"items": items, "next_cursor": next_cursor}
 
 
+@router.get("/v1/sessions/{session_id}")
+async def get_session(session_id: uuid.UUID,
+                      profile: dict = Depends(get_profile)):
+    """Direct lookup for the thread screen — the client was paginating the list
+    endpoint to find one session, so anything past ~100 entries showed 'not
+    found'. A session that isn't the caller's 404s (never 403, so we don't leak
+    that the id exists)."""
+    row = await get_pool().fetchrow(
+        """
+        select id, thread_id, question, image_url, answer, model, cost_usd,
+               feedback_rating, created_at
+        from sessions
+        where id = $1 and user_id = $2
+        """,
+        session_id, profile["id"],
+    )
+    if row is None:
+        raise ApiError(404, "NOT_FOUND", "Session not found")
+    return dict(row) | {
+        "id": str(row["id"]),
+        "thread_id": str(row["thread_id"]) if row["thread_id"] else None,
+    }
+
+
 @router.post("/v1/sessions/{session_id}/feedback", status_code=204)
 async def feedback(session_id: uuid.UUID, body: FeedbackBody,
                    profile: dict = Depends(get_profile)):

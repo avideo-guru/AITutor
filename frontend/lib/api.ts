@@ -19,10 +19,12 @@ export type Me = {
 
 export type SessionItem = {
   id: string;
+  thread_id: string | null;
   question: string;
   image_url: string | null;
   answer: string | null;
   model: string | null;
+  feedback_rating: "up" | "down" | null;
   created_at: string;
 };
 
@@ -63,6 +65,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 
 export type AskMeta = {
   session_id: string;
+  thread_id: string;
   model: string | null;
   sources: string[];
 };
@@ -75,7 +78,7 @@ export type AskCallbacks = {
 };
 
 export async function askStream(
-  body: { text?: string; image_url?: string; chapter?: string },
+  body: { text?: string; image_url?: string; chapter?: string; thread_id?: string },
   cb: AskCallbacks,
 ): Promise<void> {
   const res = await streamingFetch(`${API_URL}/v1/ask`, {
@@ -119,6 +122,23 @@ export async function askStream(
       if (block.trim()) handle(block);
     }
   }
+}
+
+// ----------------------------------------------------------- sessions
+
+export function getSession(id: string): Promise<SessionItem> {
+  return api<SessionItem>(`/v1/sessions/${id}`);
+}
+
+export function sendFeedback(
+  sessionId: string,
+  rating: "up" | "down",
+  reason?: string,
+): Promise<void> {
+  return api<void>(`/v1/sessions/${sessionId}/feedback`, {
+    method: "POST",
+    body: JSON.stringify({ rating, ...(reason ? { reason } : {}) }),
+  });
 }
 
 // ------------------------------------------------------------ image upload
