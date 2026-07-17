@@ -210,7 +210,7 @@ export default function SignIn() {
                 {"// AITUTOR.01"}
               </Text>
               <Brand size="lg" />
-              <Text style={[font.title, { color: t.fg, maxWidth: 440 }]}>
+              <Text style={[font.displaySerif, { color: t.fg, maxWidth: 460 }]}>
                 Every answer, worked step by step.
               </Text>
               <Text style={[font.body, { color: t.muted, maxWidth: 400 }]}>

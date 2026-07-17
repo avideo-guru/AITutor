@@ -124,7 +124,7 @@ export default function Ask() {
       <View style={{ flex: 1, justifyContent: "center", paddingVertical: space.xl }}>
         <Text
           style={[
-            font.display,
+            font.displaySerif,
             { color: t.fg, textAlign: "center", marginBottom: space.l },
           ]}
         >

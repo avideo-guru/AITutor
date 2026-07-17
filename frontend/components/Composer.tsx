@@ -90,9 +90,12 @@ export function Composer({
         backgroundColor: t.inputBg,
         borderWidth: 1,
         borderColor: t.border,
-        borderRadius: 16,
+        borderRadius: 24,
         padding: space.m,
         gap: space.s,
+        ...(Platform.OS === "web"
+          ? ({ boxShadow: "0 2px 16px rgba(0,0,0,0.06)" } as object)
+          : {}),
       }}
     >
       {photo && (
