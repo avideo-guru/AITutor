@@ -61,7 +61,7 @@ updated: 2026-07-16
   image questions 400).
 - **Blocking:** none.
 
-## Adaptive-loop — **A.0/A.1 merged; A.2 in [PR #10](https://github.com/aksharaverse/AITutor/pull/10); next = A.3 items** (2026-07-16)
+## Adaptive-loop — **A.0–A.2 merged; A.3 pipeline in [PR #11](https://github.com/aksharaverse/AITutor/pull/11); content is now the blocker** (2026-07-17)
 - **Status:** design + A.0 + A.1 on `main` (PRs #6, #7, **#8 `c317331`**,
   **#9 `fb90092`**). **A.2 = [PR #10](https://github.com/aksharaverse/AITutor/pull/10), open**
   — the Mechanics KC graph + a validating ingest tool. **192 tests pass**
@@ -216,8 +216,46 @@ updated: 2026-07-16
   output here** → `migration repair` (ledger-only, does not touch tables) →
   verify → then push. **Writing A.1's migration file is NOT blocked** — only
   applying it to live is.
-- **🔴 A.3 (~300 items for Mechanics) IS NOW THE CRITICAL PATH and still has no
-  owner.** A.0/A.1/A.2 are done; the loop has a graph and nowhere to get
+- **A.3 REPRIORITISED — it is a *content pipeline*, not "item sourcing"** (review
+  2026-07-17). Steps 1-3 are engineering and are **DONE in
+  [PR #11](https://github.com/aksharaverse/AITutor/pull/11)**; step 4 is the
+  human blocker; B.1 waits for a validated corpus:
+  1. ✅ item schema (`content/items/*.yaml`) + `items.slug` migration
+  2. ✅ linter `app/ingest/item_spec.py` — **content is code; bad content fails
+     like bad Python**, against files (no DB), so it runs in CI
+  3. ✅ importer `app/ingest/items.py` — transactional, idempotent, `--check`
+     needs no DB
+  4. ⬜ **curate ~300 items — STILL NO OWNER**
+  5. ⬜ *then* B.1 (Elo), against a clean corpus instead of manual cleanup
+- **🔴 `chapter` is now a validated type, not free text — `app/ids.py::ChapterId`,
+  grammar `SUBJECT::chapter_slug::grade`.** `app/ingest/cli.py --chapter` was
+  free text with only a help string: two write boundaries producing an identifier
+  that retrieval joins by **exact string equality with no FK**. Both write
+  boundaries now parse one grammar. The read boundary (`/v1/ask`, retrieval) is
+  deliberately NOT validated — a bad chapter there already returns empty, and
+  tightening it would change live behaviour. `PHY::optics::12` still parses.
+- **New ADRs:** [[ADR-015]] content ids are authored/immutable/never reused —
+  `items.slug` exists because `content_hash` as a key meant *fixing a typo
+  orphaned the item's attempts*; [[ADR-016]] an item the verifier cannot grade
+  never enters the bank — every gold is checked by the real `GoldAnswerChecker`
+  at lint time, because otherwise B.2 stores `correct = null` forever with
+  nothing alerting.
+- **Ontology versioning (asked, answered):** immutable ids make a version stamp
+  unnecessary for *correctness* — a split is "add two, keep the old", so
+  historical attempts always resolve to a KC that still means what it meant.
+  `attempts.graph_hash` was considered and **rejected** (chapter-scoped, so a
+  typo fix churns every unrelated row); provenance belongs on
+  `student_kc_state`/a training run, when Phase C needs it. A `status`
+  (active|deprecated|archived) column lands at the first real split, not before.
+- **🔴 CONTENT LANE — the honest state, from the tool itself:**
+  `Items: 8 · KCs covered: 5/57 · KCs with no items: 52`. The engine is done and
+  the bank is ~3% full. Curation target ~300 = 57 KCs x ~5-6 (a KC with <5 items
+  can be *served* but not *adapted over* — there's no difficulty ladder to
+  select from). Sourcing = past JEE + NCERT exemplar (public), `kc` from
+  `content/kc/phy_mechanics.yaml`, `answer` as `{value, unit}` or `{choices:[..]}`.
+  `source` is REQUIRED (attribution). Symbolic-only answers are rejected until
+  P5.0's sympy checker. **Do not build 5,000 before D7 is measured.**
+- **(superseded note)** A.3 items were already flagged as the critical path: A.0/A.1/A.2 are done; the loop has a graph and nowhere to get
   questions. This is curation hours, not code — the only non-code thing between
   us and a measurable D7. Sourcing = past JEE papers + NCERT exemplar (public;
   same attribution rules as the P3 golden set), tagged with `kc_id` from
