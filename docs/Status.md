@@ -317,6 +317,17 @@ updated: 2026-07-19
 ## UI/UX + Infra (`feat/ui-redesign`, `feat/deploy-cloudrun`)
 - **Status:** in progress — UI redesign + owns live-infra/deploy lane
 - **Last update:** 2026-07-19
+- **🆕🟢 (2026-07-19) CI EXISTS — [PR #17](https://github.com/aksharaverse/AITutor/pull/17)
+  (`feat/ci`), ALL THREE JOBS GREEN on its first run.** `.github/workflows/ci.yml`:
+  backend pytest (194) · **fresh-DB migration apply** (pgvector:pg16 + the
+  auth stubs from `test_migration_hygiene.py`'s docstring, 11-table existence
+  check) · frontend `tsc --noEmit`. Markdown-only pushes skip it, so Status.md
+  handoffs stay free. **Consequence for the adaptive lane: A.1's migration is
+  now PROVEN against a fresh database** — the run applied both migrations with
+  `ON_ERROR_STOP` and all tables exist. The "reviewed, not proven" 🔴 above is
+  half-cleared: the fresh-DB gate is done; **only the live-ledger
+  reconciliation still blocks `supabase db push`.** Merge #17 and every future
+  PR gets this gate for free.
 - **🆕 (2026-07-19) Roadmap rewritten — [PR #16](https://github.com/aksharaverse/AITutor/pull/16)
   (`docs/roadmap-2026-07`), ready for review.** Full-repo analysis found
   `docs/Roadmap.md` frozen at 2026-06-28 (pre-Opus-plan, pre-adaptive-lane).
