@@ -1,0 +1,116 @@
+# CI — the gate docs/Status.md called the biggest infrastructure gap.
+#
+# Three jobs, all provable on a laptop-free runner:
+#   backend-tests      — the pytest suite (194 tests as of 2026-07-19)
+#   migrations         — apply supabase/migrations/ to a FRESH pgvector Postgres,
+#                        in lexical order, failing loudly. This is the check
+#                        ADR-011 exists for: a migration is proven by building an
+#                        empty database, not by "ran fine" on a drifted one.
+#                        Supabase-managed objects (auth schema/users/uid()) are
+#                        stubbed exactly as backend/tests/test_migration_hygiene.py's
+#                        docstring prescribes.
+#   frontend-typecheck — tsc --noEmit, the same check every UI PR quotes.
+#
+# Markdown-only changes (Status.md handoffs land on main every session) skip CI.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**/*.md"]
+  pull_request:
+    paths-ignore: ["**/*.md"]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # matches backend/Dockerfile
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Install deps
+        run: pip install -r backend/requirements-dev.txt
+      - name: Run tests
+        # `python -m pytest` (not bare `pytest`): -m puts backend/ on sys.path,
+        # which is how `import app` resolves — same invocation as on the laptops.
+        working-directory: backend
+        run: python -m pytest tests -q
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB: postgres://postgres:test@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stub Supabase-managed objects
+        # The migrations reference auth.users (FKs) and auth.uid() (RLS
+        # policies); on Supabase these exist before any migration runs.
+        run: |
+          psql "$DB" -v ON_ERROR_STOP=1 <<'SQL'
+          create schema auth;
+          create table auth.users (id uuid primary key);
+          create function auth.uid() returns uuid
+            language sql stable as 'select null::uuid';
+          create schema extensions;
+          SQL
+      - name: Apply migrations in order
+        # Lexical order == chronological order (enforced by
+        # test_migration_hygiene.py). One psql per file so the failing file is
+        # named in the log, not buried in a concatenated stream.
+        run: |
+          for f in supabase/migrations/*.sql; do
+            echo "== applying $f"
+            psql "$DB" -v ON_ERROR_STOP=1 -f "$f"
+          done
+      - name: Verify expected tables exist
+        # The drift check: a guard that silently no-ops leaves a table missing
+        # here. Keep this list in sync when a migration adds a table.
+        run: |
+          psql "$DB" -v ON_ERROR_STOP=1 <<'SQL'
+          do $$
+          declare
+            missing text;
+          begin
+            select string_agg(t, ', ') into missing
+            from unnest(array[
+              'profiles', 'sessions', 'chunks', 'billing_events', 'traces',
+              'knowledge_components', 'kc_edges', 'items', 'attempts',
+              'student_kc_state', 'item_state'
+            ]) as t
+            where to_regclass('public.' || t) is null;
+            if missing is not null then
+              raise exception 'tables missing after migration apply: %', missing;
+            end if;
+          end $$;
+          SQL
+
+  frontend-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install deps
+        working-directory: frontend
+        run: npm ci
+      - name: Typecheck
+        working-directory: frontend
+        run: npm run typecheck
